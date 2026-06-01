@@ -1,0 +1,6 @@
+interface:
+  display_name: "Ghostty Config Zh"
+  short_description: "Repo-specific patterns and workflows for ghostty-config-zh"
+  default_prompt: "Use the ghostty-config-zh repo skill to follow existing architecture, testing, and workflow conventions."
+policy:
+  allow_implicit_invocation: true

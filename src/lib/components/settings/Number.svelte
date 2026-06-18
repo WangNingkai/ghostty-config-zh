@@ -1,4 +1,6 @@
 <script lang="ts">
+    import {countDecimalPlaces} from "$lib/utils/numbers";
+
     type Props = {
         value: number | undefined;
         min?: number;
@@ -45,6 +47,9 @@
     // Determine if we should enforce integer values based on props
     const isActuallyInteger = $derived.by(() => integer && isDetectedAsInteger);
 
+    // Calculate the number of decimal places to show based on step, min, and max
+    const maxDecimalPlaces = $derived(Math.max(countDecimalPlaces(min), countDecimalPlaces(max), countDecimalPlaces(step)));
+
     $effect(() => {
         if (!size) {
             const referenceValue = (value !== undefined && !Number.isNaN(value) && isValid()) ? value : (max ?? 100);
@@ -61,7 +66,7 @@
 
         const newValue = value + step;
         if (max === undefined || newValue <= max) {
-            value = newValue;
+            value = isActuallyInteger ? newValue : parseFloat(newValue.toFixed(maxDecimalPlaces));
         }
     }
 
@@ -74,7 +79,7 @@
 
         const newValue = value - step;
         if (min === undefined || newValue >= min) {
-            value = newValue;
+            value = isActuallyInteger ? newValue : parseFloat(newValue.toFixed(maxDecimalPlaces));
         }
     }
 

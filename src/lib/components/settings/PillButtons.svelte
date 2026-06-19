@@ -1,10 +1,12 @@
 <script lang="ts" module>
     export type PillVariant = "neutral" | "accent" | "danger";
+    export type PillSize = "default" | "compact";
 
     export interface PillOption {
         label: string;
         value: string;
         variant?: PillVariant;
+        size?: PillSize;
     }
 </script>
 
@@ -14,10 +16,11 @@
         value: string;
         options: PillOption[];
         onchange?: (v: string) => void;
+        size?: PillSize;
     }
 
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(), options, onchange}: Props = $props();
+    let {value = $bindable(), options, onchange, size = "default"}: Props = $props();
 
     function click(optionValue: string) {
         value = optionValue;
@@ -26,7 +29,7 @@
 </script>
 
 
-<div class="pill-group" role="group">
+<div class="pill-group" role="group" class:compact={size === "compact"}>
     {#each options as option (option.value)}
         <button
             type="button"
@@ -65,6 +68,11 @@
     transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
     white-space: nowrap;
     line-height: 1.6;
+}
+
+.pill-group.compact .pill {
+    padding: 1px 7px;
+    font-size: 0.78em;
 }
 
 .pill:hover:not(.active) {

@@ -25,6 +25,7 @@
     import Radio from "$lib/components/settings/Radio.svelte";
     import FeatureListSimple from "$lib/components/settings/FeatureListSimple.svelte";
     import EditableRepeatableText from "$lib/components/settings/EditableRepeatableText.svelte";
+    import NumberWithUnits from "$lib/components/settings/NumberWithUnits.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -38,6 +39,7 @@
         numberBasic: number;
         numberWithUndefined: number | undefined;
         numberFractional: number;
+        numberWithUnits: string;
         rangeBasic: number;
         rangeLabeled: number;
         textBasic: string;
@@ -62,6 +64,7 @@
         numberBasic: 42,
         numberWithUndefined: undefined,
         numberFractional: 1.4,
+        numberWithUnits: "10px",
         rangeBasic: 42,
         rangeLabeled: 0.4,
         textBasic: "Hello, world!",
@@ -122,6 +125,10 @@
         <Separator />
         <Item name="Number with undefined" note="Supports undefined value for 'no value' state.">
             <Number bind:value={values.numberWithUndefined} min={0} max={100} step={1} placeholder="No value" />
+        </Item>
+        <Separator />
+        <Item name="Number with units" note="Supports numbers with units.">
+            <NumberWithUnits bind:value={values.numberWithUnits} />
         </Item>
         <Separator />
         <Item name="Fractional number" note="Supports fractional values when step is non-integer.">

@@ -9,11 +9,12 @@
         size?: number;
         placeholder?: string;
         integer?: boolean;
+        onchange?: (value: number | undefined) => void;
     };
 
     // why is eslint like this smh
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(), min, max, step = 1, size, placeholder, integer = true}: Props = $props();
+    let {value = $bindable(), min, max, step = 1, size, placeholder, integer = true, onchange}: Props = $props();
 
 
     const wasInitiallyUndefined = value === undefined;
@@ -57,29 +58,34 @@
         }
     });
 
+    function commit(next: number | undefined) {
+        value = next;
+        onchange?.(next);
+    }
+
     function increment() {
         // If current value is undefined, NaN, or invalid, start from min (or 0)
         if (value === undefined || Number.isNaN(value) || !isValid()) {
-            value = min ?? 0;
+            commit(min ?? 0);
             return;
         }
 
         const newValue = value + step;
         if (max === undefined || newValue <= max) {
-            value = isActuallyInteger ? newValue : parseFloat(newValue.toFixed(maxDecimalPlaces));
+            commit(isActuallyInteger ? newValue : parseFloat(newValue.toFixed(maxDecimalPlaces)));
         }
     }
 
     function decrement() {
         // If current value is undefined, NaN, or invalid, start from max (or min, or 0)
         if (value === undefined || Number.isNaN(value) || !isValid()) {
-            value = max ?? Math.max(0, min ?? 0);
+            commit(max ?? Math.max(0, min ?? 0));
             return;
         }
 
         const newValue = value - step;
         if (min === undefined || newValue >= min) {
-            value = isActuallyInteger ? newValue : parseFloat(newValue.toFixed(maxDecimalPlaces));
+            commit(isActuallyInteger ? newValue : parseFloat(newValue.toFixed(maxDecimalPlaces)));
         }
     }
 
@@ -89,9 +95,7 @@
 
         // Allow empty input - set to undefined
         if (inputText === "") {
-            if (wasInitiallyUndefined) {
-                value = undefined;
-            }
+            if (wasInitiallyUndefined) commit(undefined);
             return;
         }
 
@@ -101,7 +105,7 @@
             let constrainedValue = isActuallyInteger ? Math.round(numValue) : numValue;
             if (min !== undefined && constrainedValue < min) constrainedValue = min;
             if (max !== undefined && constrainedValue > max) constrainedValue = max;
-            value = constrainedValue;
+            commit(constrainedValue);
         }
         else {
             // Cleanup for this will happen onBlur rather than trying to be smart while they type
@@ -130,7 +134,7 @@
     // Use an IIFE to do this synchronously during init and make svelte stop complaining
     (() => {
         if (typeof value === "string") {
-            value = isActuallyInteger ? parseInt(value, 10) : parseFloat(value);
+            commit(isActuallyInteger ? parseInt(value, 10) : parseFloat(value));
         }
     })();
 </script>

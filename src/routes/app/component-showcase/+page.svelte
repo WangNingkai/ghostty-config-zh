@@ -24,6 +24,7 @@
     import FeatureList from "$lib/components/settings/FeatureList.svelte";
     import Radio from "$lib/components/settings/Radio.svelte";
     import FeatureListSimple from "$lib/components/settings/FeatureListSimple.svelte";
+    import EditableRepeatableText from "$lib/components/settings/EditableRepeatableText.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -43,6 +44,7 @@
         textRepeatable: string[];
         textRepeatableAdvanced: string[];
         textInlineRepeatable: string[];
+        textEditableRepeatable: string[];
         pillButtons: string;
         featureList: string;
         radioBasic: string;
@@ -66,6 +68,7 @@
         textRepeatable: ["Item 1", "Item 2", "Item 3"],
         textRepeatableAdvanced: ["Value A", "Value B"],
         textInlineRepeatable: ["Inline 1", "Inline 2", "Inline 3", "Inline 4"],
+        textEditableRepeatable: ["Editable 1", "Editable 2"],
         pillButtons: "default",
         featureList: "feature-a,no-feature-b",
         radioBasic: "option1",
@@ -149,6 +152,10 @@
         <Separator />
         <Item name="Inline Repeatable Text" note="This is an inline repeatable text input.">
             <InlineRepeatableText bind:value={values.textInlineRepeatable} placeholder="Enter value" />
+        </Item>
+        <Separator />
+        <Item name="Editable Repeatable Text" note="This is an editable repeatable text input.">
+            <EditableRepeatableText bind:value={values.textEditableRepeatable} placeholder="Enter value" />
         </Item>
     </Group>
 

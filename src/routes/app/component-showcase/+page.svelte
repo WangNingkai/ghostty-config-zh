@@ -26,6 +26,7 @@
     import FeatureListSimple from "$lib/components/settings/FeatureListSimple.svelte";
     import EditableRepeatableText from "$lib/components/settings/EditableRepeatableText.svelte";
     import NumberWithUnits from "$lib/components/settings/NumberWithUnits.svelte";
+    import CustomColor from "$lib/components/settings/CustomColor.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -36,6 +37,7 @@
         booleanSwitch: boolean;
         colorBasic: HexColor;
         colorPalette: HexColor[];
+        colorCustom: string;
         numberBasic: number;
         numberWithUndefined: number | undefined;
         numberFractional: number;
@@ -61,6 +63,7 @@
         booleanSwitch: false,
         colorBasic: "#4f5a6f",
         colorPalette: ["#4f5a6f", "#f6f7fb", "#c0d0e0", "#a0b0c0", "#708090"],
+        colorCustom: "transparent",
         numberBasic: 42,
         numberWithUndefined: undefined,
         numberFractional: 1.4,
@@ -100,6 +103,17 @@
         <Separator />
         <Item name="Color Palette" note="This is a color palette input.">
             <Palette bind:value={values.colorPalette} defaultValue={["#4f5a6f", "#f6f7fb", "#c0d0e0", "#a0b0c0", "#708090"]} />
+        </Item>
+        <Separator />
+        <Item name="Custom Color" note="Supports both custom hex colors and predefined special values.">
+            <CustomColor
+                bind:value={values.colorCustom}
+                presets={[
+                    {value: "transparent", label: "Transparent"},
+                    {value: "currentColor", label: "Current color"},
+                ]}
+                default="#122A5F"
+            />
         </Item>
     </Group>
 

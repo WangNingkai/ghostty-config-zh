@@ -4,19 +4,29 @@
     import ColorPicker from "$lib/components/ColorPicker.svelte";
     import {success} from "$lib/stores/toasts.svelte";
 
+    interface Props {
+        value: HexColor;
+        size?: number;
+        label?: string;
+        defaultValue?: HexColor;
+        disabled?: boolean;
+    }
+
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(), size = 20, label = "", defaultValue}: {value: HexColor, size?: number, label?: string, defaultValue?: HexColor} = $props();
+    let {value = $bindable(), size = 20, label = "", defaultValue, disabled = false}: Props = $props();
     const borderColor = $derived(`rgba(255, 255, 255, ${luminosity(value) * 0.0027451 + 0.3})`);
     const labelColor = $derived(isDark(value) ? `var(--font-color)` : "black");
     let popoutOpen = $state(false);
 
     function click(event: Event) {
+        if (disabled) return;
         event.preventDefault();
         event.stopPropagation();
         popoutOpen = !popoutOpen;
     }
 
     function reset(event: MouseEvent) {
+        if (disabled) return;
         event.preventDefault();
         event.stopPropagation();
         if (defaultValue !== undefined) {
@@ -34,9 +44,9 @@
 
 <svelte:document onkeydown={keydown} />
 
-<div class="color-wrap" style:width="{size}px" style:height="{size}px" style:background-color={value} style:border-color={borderColor}>
+<div class="color-wrap" style:width="{size}px" style:height="{size}px" style:background-color={value} style:border-color={borderColor} class:disabled>
     {#if label}<span class="label" style:color={labelColor}>{label}</span>{/if}
-    <input type="color" bind:value style:width="{size}px" style:height="{size}px" onclick={click} oncontextmenu={reset} />
+    <input type="color" bind:value style:width="{size}px" style:height="{size}px" onclick={click} oncontextmenu={reset} {disabled} />
 </div>
 
 {#if popoutOpen}
@@ -105,6 +115,11 @@
     box-shadow: 0 0 3px 0px black;
     justify-content: center;
     align-items: center;
+}
+
+.color-wrap.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 input {

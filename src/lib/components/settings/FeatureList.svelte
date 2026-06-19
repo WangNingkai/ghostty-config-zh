@@ -13,10 +13,11 @@
     interface Props {
         value: string; // raw config string, e.g. 'cursor,no-sudo,title'
         features: Feature[];
+        borderless?: boolean;
     }
 
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(), features}: Props = $props();
+    let {value = $bindable(), features, borderless = false}: Props = $props();
 
     type FeatureState = "default" | "on" | "off";
 
@@ -56,7 +57,7 @@
 </script>
 
 <!-- TODO: should this use Group and Separator components? -->
-<div class="feature-list">
+<div class="feature-list" class:borderless>
     {#each features as feature (feature.id)}
         <div class="feature-row">
             <span class="feature-label">{feature.label}</span>
@@ -66,6 +67,7 @@
                 onchange={(v: string) => setState(feature.id, v)}
             />
         </div>
+        <!-- {#if i < features.length - 1}<Separator />{/if} -->
     {/each}
 </div>
 
@@ -79,6 +81,13 @@
     border: 1px solid var(--border-level-2);
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
     overflow: hidden;
+    flex: 1;
+}
+
+.feature-list.borderless {
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .feature-row {
@@ -89,8 +98,13 @@
     gap: 12px;
 }
 
+.feature-list.borderless .feature-row {
+    padding-left: 0;
+    padding-right: 0;
+}
+
 .feature-row + .feature-row {
-    border-top: 1px solid var(--border-level-2, rgba(255,255,255,0.07));
+    border-top: 1px solid var(--bg-separator, rgba(255,255,255,0.07));
 }
 
 .feature-label {

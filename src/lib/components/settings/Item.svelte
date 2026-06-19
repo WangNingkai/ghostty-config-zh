@@ -147,6 +147,10 @@
     /* box-sizing: border-box; */
     /* padding: 4px 8px; */
     /* margin: -4px -8px; */
+    /* position: relative; */
+}
+
+.setting-item.flash-highlight {
     position: relative;
 }
 

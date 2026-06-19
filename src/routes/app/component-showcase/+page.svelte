@@ -17,6 +17,7 @@
     import Range from "$lib/components/settings/Range.svelte";
     import Palette from "$lib/components/settings/Palette.svelte";
     import Text from "$lib/components/settings/Text.svelte";
+    import RepeatableText from "$lib/components/settings/RepeatableText.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -33,6 +34,8 @@
         rangeBasic: number;
         rangeLabeled: number;
         textBasic: string;
+        textRepeatable: string[];
+        textRepeatableAdvanced: string[];
     }
 
     const values = $state<Values>({
@@ -48,6 +51,8 @@
         rangeBasic: 42,
         rangeLabeled: 0.4,
         textBasic: "Hello, world!",
+        textRepeatable: ["Item 1", "Item 2", "Item 3"],
+        textRepeatableAdvanced: ["Value A", "Value B"]
     });
 </script>
 
@@ -114,6 +119,14 @@
     <Group title="Text">
         <Item name="Basic text" note="This is a text input.">
             <Text bind:value={values.textBasic} placeholder="Enter text here" />
+        </Item>
+        <Separator />
+        <Item name="Repeatable Text" note="This is a repeatable text input.">
+            <RepeatableText bind:value={values.textRepeatable} />
+        </Item>
+        <Separator />
+        <Item name="Repeatable Text Advanced" note="This is an advanced repeatable text input.">
+            <RepeatableText bind:value={values.textRepeatableAdvanced} placeholder="Enter value" emptyLabel="No values set" maxPreview={3} canReorder={false} />
         </Item>
     </Group>
 

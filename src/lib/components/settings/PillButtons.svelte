@@ -1,0 +1,92 @@
+<script lang="ts" module>
+    export type PillVariant = "neutral" | "accent" | "danger";
+
+    export interface PillOption {
+        label: string;
+        value: string;
+        variant?: PillVariant;
+    }
+</script>
+
+
+<script lang="ts">
+    interface Props {
+        value: string;
+        options: PillOption[];
+        onchange?: (v: string) => void;
+    }
+
+    // eslint-disable-next-line prefer-const
+    let {value = $bindable(), options, onchange}: Props = $props();
+
+    function click(optionValue: string) {
+        value = optionValue;
+        onchange?.(value);
+    }
+</script>
+
+
+<div class="pill-group" role="group">
+    {#each options as option (option.value)}
+        <button
+            type="button"
+            class="pill"
+            class:active={value === option.value}
+            class:danger={option.variant === "danger"}
+            class:accent={option.variant === "accent"}
+            onclick={() => click(option.value)}
+            aria-pressed={value === option.value}
+        >
+            {option.label}
+        </button>
+    {/each}
+</div>
+
+
+<style>
+.pill-group {
+    display: inline-flex;
+    border-radius: var(--radius-level-4, 6px);
+    border: 1px solid rgba(255,255,255,0.13);
+    background: rgba(255,255,255,0.06);
+    padding: 2px;
+    gap: 2px;
+}
+
+.pill {
+    border: none;
+    border-radius: calc(var(--radius-level-4, 6px) - 2px);
+    padding: 2px 10px;
+    font-size: 0.85em;
+    font-family: inherit;
+    color: var(--font-color-muted, rgba(255,255,255,0.45));
+    background: transparent;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+    white-space: nowrap;
+    line-height: 1.6;
+}
+
+.pill:hover:not(.active) {
+    background: rgba(255,255,255,0.10);
+    color: var(--font-color, #e0d9f0);
+}
+
+.pill.active {
+    background: rgba(255,255,255,0.14);
+    color: var(--font-color, #e0d9f0);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+
+.pill.active.accent {
+    background: color-mix(in srgb, var(--color-accent, #6c8fff) 22%, transparent);
+    color: var(--color-accent, #6c8fff);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+
+.pill.active.danger{
+    background: color-mix(in srgb, var(--color-danger, #e05c5c) 18%, transparent);
+    color: var(--color-danger, #e05c5c);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.35);
+}
+</style>

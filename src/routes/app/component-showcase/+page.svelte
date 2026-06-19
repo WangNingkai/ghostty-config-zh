@@ -19,6 +19,7 @@
     import Text from "$lib/components/settings/Text.svelte";
     import RepeatableText from "$lib/components/settings/RepeatableText.svelte";
     import InlineRepeatableText from "$lib/components/settings/InlineRepeatableText.svelte";
+    import PillButtons from "$lib/components/settings/PillButtons.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -38,6 +39,7 @@
         textRepeatable: string[];
         textRepeatableAdvanced: string[];
         textInlineRepeatable: string[];
+        pillButtons: string;
     }
 
     const values = $state<Values>({
@@ -55,7 +57,8 @@
         textBasic: "Hello, world!",
         textRepeatable: ["Item 1", "Item 2", "Item 3"],
         textRepeatableAdvanced: ["Value A", "Value B"],
-        textInlineRepeatable: ["Inline 1", "Inline 2", "Inline 3", "Inline 4"]
+        textInlineRepeatable: ["Inline 1", "Inline 2", "Inline 3", "Inline 4"],
+        pillButtons: "default",
     });
 </script>
 
@@ -134,6 +137,19 @@
         <Separator />
         <Item name="Inline Repeatable Text" note="This is an inline repeatable text input.">
             <InlineRepeatableText bind:value={values.textInlineRepeatable} placeholder="Enter value" />
+        </Item>
+    </Group>
+
+    <Group title="Pill Buttons">
+        <Item name="Pill Buttons" note="This is a pill buttons input.">
+            <PillButtons
+                bind:value={values.pillButtons}
+                options={[
+                    {value: "default", label: "Default"},
+                    {value: "true", label: "On", variant: "accent"},
+                    {value: "false", label: "Off", variant: "danger"},
+                ]}
+            />
         </Item>
     </Group>
 

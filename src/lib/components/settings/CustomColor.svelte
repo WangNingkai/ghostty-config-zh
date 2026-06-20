@@ -19,7 +19,7 @@
 
     const isPreset = (v: string): boolean => specials.some(s => s.value === v);
 
-    const mode = $derived(isPreset(value) ? value : "custom");
+    let mode = $derived(isPreset(value) ? value : "custom");
 
     // Use an iife because svelte linting
     let customColor = $state<HexColor>((() => isPreset(value) ? defaultValue ?? "#ffffff" : value as HexColor)());
@@ -37,9 +37,9 @@
 
     // Track hex changes from the color picker
     function onColorChange(hex: HexColor) {
-        if (mode !== "custom") return; // shouldn't happen since Color is disabled in non-custom mode, but just in case
         customColor = hex;
-        value = hex;
+        if (mode !== "custom") mode = "custom"; // switch to custom mode if not already there
+        value = customColor;
     }
 </script>
 
@@ -47,7 +47,6 @@
     <Color
         bind:value={() => customColor, onColorChange} // TODO: use functional binds like this more often instead of onchange
         {defaultValue}
-        disabled={mode !== "custom"}
     />
     <PillButtonGroup
         value={mode}

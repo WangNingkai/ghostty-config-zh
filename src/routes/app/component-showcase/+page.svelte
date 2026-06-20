@@ -27,6 +27,7 @@
     import EditableRepeatableText from "$lib/components/settings/EditableRepeatableText.svelte";
     import NumberWithUnits from "$lib/components/settings/NumberWithUnits.svelte";
     import CustomColor from "$lib/components/settings/CustomColor.svelte";
+    import DualNumber from "$lib/components/settings/DualNumber.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -42,6 +43,8 @@
         numberWithUndefined: number | undefined;
         numberFractional: number;
         numberWithUnits: string;
+        numberDual: string;
+        numberDualLinked: string;
         rangeBasic: number;
         rangeLabeled: number;
         textBasic: string;
@@ -68,6 +71,8 @@
         numberWithUndefined: undefined,
         numberFractional: 1.4,
         numberWithUnits: "10px",
+        numberDual: "80,60",
+        numberDualLinked: "50",
         rangeBasic: 42,
         rangeLabeled: 0.4,
         textBasic: "Hello, world!",
@@ -105,7 +110,7 @@
             <Palette bind:value={values.colorPalette} defaultValue={["#4f5a6f", "#f6f7fb", "#c0d0e0", "#a0b0c0", "#708090"]} />
         </Item>
         <Separator />
-        <Item name="Custom Color" note="Supports both custom hex colors and predefined special values.">
+        <Item name="Custom Color" note="Supports both custom hex colors and predefined special values. Currently: {values.colorCustom}">
             <CustomColor
                 bind:value={values.colorCustom}
                 presets={[
@@ -156,6 +161,14 @@
         <Item name="Range with labels" note="Shows min/max labels when showLabels is true.">
             <Range bind:value={values.rangeLabeled} min={0} max={1} step={0.1} showLabels />
          </Item>
+         <Separator />
+        <Item name="Dual Number ({values.numberDual})" note="Two linked number inputs for related values, e.g. width and height.">
+            <DualNumber bind:value={values.numberDual} labels={["Width", "Height"]} min={0} max={1000} step={1} />
+        </Item>
+        <Separator />
+        <Item name="Dual Number ({values.numberDualLinked})" note="Two linked number inputs for related values, e.g. width and height.">
+            <DualNumber bind:value={values.numberDualLinked} labels={["X", "Y"]} min={0} max={1000} step={1} />
+        </Item>
     </Group>
 
     <Group title="Text">

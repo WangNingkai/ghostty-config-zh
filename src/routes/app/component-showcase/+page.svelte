@@ -28,6 +28,7 @@
     import NumberWithUnits from "$lib/components/settings/NumberWithUnits.svelte";
     import CustomColor from "$lib/components/settings/CustomColor.svelte";
     import DualNumber from "$lib/components/settings/DualNumber.svelte";
+    import Duration from "$lib/components/settings/Duration.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -52,6 +53,8 @@
         textRepeatableAdvanced: string[];
         textInlineRepeatable: string[];
         textEditableRepeatable: string[];
+        textDuration: string;
+        textDurationNullable: string;
         pillButtons: string;
         featureList: string;
         radioBasic: string;
@@ -80,6 +83,8 @@
         textRepeatableAdvanced: ["Value A", "Value B"],
         textInlineRepeatable: ["Inline 1", "Inline 2", "Inline 3", "Inline 4"],
         textEditableRepeatable: ["Editable 1", "Editable 2"],
+        textDuration: "1h30m",
+        textDurationNullable: "",
         pillButtons: "default",
         featureList: "feature-a,no-feature-b",
         radioBasic: "option1",
@@ -184,12 +189,20 @@
             <RepeatableText bind:value={values.textRepeatableAdvanced} placeholder="Enter value" emptyLabel="No values set" maxPreview={3} canReorder={false} />
         </Item>
         <Separator />
-        <Item name="Inline Repeatable Text" note="This is an inline repeatable text input.">
+        <Item name="Inline Repeatable Text" note="This is an inline repeatable text input." inline={false}>
             <InlineRepeatableText bind:value={values.textInlineRepeatable} placeholder="Enter value" />
         </Item>
         <Separator />
         <Item name="Editable Repeatable Text" note="This is an editable repeatable text input.">
             <EditableRepeatableText bind:value={values.textEditableRepeatable} placeholder="Enter value" />
+        </Item>
+        <Separator />
+        <Item name="Duration Text ({values.textDuration})" note="This is a duration text input that parses human-friendly duration formats (e.g. '1h 30m', '45s', '500ms').">
+            <Duration bind:value={values.textDuration} />
+        </Item>
+        <Separator />
+        <Item name="Nullable Duration Text ({values.textDurationNullable})" note="This is a duration text input that parses human-friendly duration formats (e.g. '1h 30m', '45s', '500ms').">
+            <Duration bind:value={values.textDurationNullable} nullable placeholder="No value" />
         </Item>
     </Group>
 

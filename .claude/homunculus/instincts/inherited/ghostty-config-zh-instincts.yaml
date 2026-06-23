@@ -1,0 +1,344 @@
+# Instincts generated from https://github.com/WangNingkai/ghostty-config-zh
+# Generated: 2026-06-01T04:31:46.734Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: ghostty-config-zh-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Commit Length
+
+## Action
+
+Keep commit messages concise (~43 characters)
+
+## Evidence
+
+- Average commit message length: 43 chars
+- Based on 3 commits
+
+---
+id: ghostty-config-zh-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Naming Files
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: PascalCase
+
+---
+id: ghostty-config-zh-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: ghostty-config-zh-arch-type-based
+trigger: "when adding new code"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: https://github.com/WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Arch Type Based
+
+## Action
+
+Place code in the appropriate type folder (components/, services/, utils/, etc.)
+
+## Evidence
+
+- Type-based module organization detected
+- Folders: lib, routes
+
+---
+id: ghostty-config-zh-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: ghostty-config-zh-workflow-settings-feature-update
+trigger: "when doing settings feature update"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Workflow Settings Feature Update
+
+## Action
+
+Follow the settings-feature-update workflow:
+1. Modify src/lib/components/settings/Item.svelte to update UI or logic for individual settings.
+2. Update src/lib/stores/config.svelte.ts to handle new or changed settings logic.
+3. Edit src/routes/settings/[category]/+page.svelte to reflect changes in the settings page.
+4. Optionally, update src/lib/components/settings/Number.svelte if number settings are affected.
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: src/lib/components/settings/Item.svelte, src/lib/stores/config.svelte.ts, src/routes/settings/[category]/+page.svelte
+
+---
+id: ghostty-config-zh-instinct-file-naming
+trigger: "When creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct File Naming
+
+## Action
+
+Name the file using PascalCase (e.g., MyComponent.svelte)
+
+## Evidence
+
+- Pattern in src/lib/components/settings/Item.svelte
+- Pattern in src/lib/components/settings/Number.svelte
+
+---
+id: ghostty-config-zh-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Function Naming
+
+## Action
+
+Name the function using camelCase (e.g., resetSettings)
+
+## Evidence
+
+- Pattern in src/lib/stores/config.svelte.ts
+
+---
+id: ghostty-config-zh-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Class Naming
+
+## Action
+
+Name the class using PascalCase (e.g., SettingsManager)
+
+## Evidence
+
+- Pattern in TypeScript conventions
+
+---
+id: ghostty-config-zh-instinct-constant-naming
+trigger: "When declaring a constant"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Constant Naming
+
+## Action
+
+Name the constant using SCREAMING_SNAKE_CASE (e.g., DEFAULT_SETTINGS)
+
+## Evidence
+
+- Pattern in TypeScript conventions
+
+---
+id: ghostty-config-zh-instinct-import-style
+trigger: "When importing modules"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Import Style
+
+## Action
+
+Use absolute import paths
+
+## Evidence
+
+- Pattern in src/lib/components/settings/Item.svelte
+- Pattern in src/lib/stores/config.svelte.ts
+
+---
+id: ghostty-config-zh-instinct-export-style
+trigger: "When exporting modules or functions"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in src/lib/stores/config.svelte.ts
+
+---
+id: ghostty-config-zh-instinct-testing-location
+trigger: "When adding or updating tests"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Testing Location
+
+## Action
+
+Place tests in a separate folder from the source code
+
+## Evidence
+
+- Architecture pattern: testLocation is 'separate'
+
+---
+id: ghostty-config-zh-instinct-testing-pattern
+trigger: "When writing tests for a module"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Testing Pattern
+
+## Action
+
+Mirror the source folder structure in the test folder for organization
+
+## Evidence
+
+- Architecture: single-package, separate test location
+
+---
+id: ghostty-config-zh-instinct-commit-format-freeform
+trigger: "When writing a commit message"
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Commit Format Freeform
+
+## Action
+
+Use a concise, freeform message describing the change (e.g., 'Allow resetting individual settings')
+
+## Evidence
+
+- Seen in commit: 'Allow resetting individual settings'
+- Seen in commit: 'Fix array setting reset and tooltip use'
+
+---
+id: ghostty-config-zh-instinct-commit-format-merge
+trigger: "When merging a pull request"
+confidence: 0.9
+domain: git
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Commit Format Merge
+
+## Action
+
+Use the format: 'Merge pull request #[number] from [branch]'
+
+## Evidence
+
+- Seen in commit: 'Merge pull request #63 from zerebos/feat/reset-settings'
+
+---
+id: ghostty-config-zh-instinct-settings-feature-update
+trigger: "When adding, fixing, or enhancing settings functionality"
+confidence: 0.9
+domain: workflow
+source: repo-analysis
+source_repo: WangNingkai/ghostty-config-zh
+---
+
+# Ghostty Config Zh Instinct Settings Feature Update
+
+## Action
+
+Update src/lib/components/settings/Item.svelte, src/lib/stores/config.svelte.ts, src/routes/settings/[category]/+page.svelte, and optionally src/lib/components/settings/Number.svelte as needed
+
+## Evidence
+
+- Workflow: settings-feature-update
+- Seen in commits: 'Modify src/lib/components/settings/Item.svelte to update UI or logic for individual settings.', 'Update src/lib/stores/config.svelte.ts to handle new or changed settings logic.'
+

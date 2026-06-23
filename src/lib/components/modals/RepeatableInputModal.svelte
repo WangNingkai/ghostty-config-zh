@@ -3,11 +3,15 @@
     import Button from "$lib/components/Button.svelte";
     import Text from "../settings/Text.svelte";
     import Admonition from "../Admonition.svelte";
+    import {onMount} from "svelte";
 
     interface Props {
         draftValues: string[];
         placeholder?: string;
         canReorder?: boolean;
+        title?: string;
+        allowDuplicates?: boolean;
+        allowEmpty?: boolean;
         onclose?: () => void;
         onsave?: (values: string[]) => void;
     }
@@ -16,6 +20,9 @@
         draftValues = $bindable([]),
         placeholder = "New item", // eslint-disable-line prefer-const
         canReorder = true, // eslint-disable-line prefer-const
+        title = "Repeatable Value Editor", // eslint-disable-line prefer-const
+        allowDuplicates = false, // eslint-disable-line prefer-const
+        allowEmpty = true, // eslint-disable-line prefer-const
         onclose, // eslint-disable-line prefer-const
         onsave, // eslint-disable-line prefer-const
     }: Props = $props();
@@ -32,6 +39,12 @@
     })());
 
     const hasDuplicates = $derived(duplicateValues.size > 0);
+    const isEmpty = $derived(draftValues.every(item => item.trim() === ""));
+    const canSave = $derived.by(() => {
+        if (!allowDuplicates && hasDuplicates) return false;
+        if (!allowEmpty && isEmpty) return false;
+        return true;
+    });
 
 
     function addRow() {
@@ -60,9 +73,19 @@
         draftValues = newValues;
     }
 
+    let editorRef: HTMLDivElement | null = $state(null);
+    onMount(() => {
+        if (!editorRef) return;
+
+        // TODO: figure out why eslint is having a hissy fit about this, it's perfectly valid code
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment
+        const firstInput = editorRef.querySelector<HTMLInputElement>("input");
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        if (firstInput) firstInput.focus();
+    });
 </script>
 
-<DialogModal title="Repeatable Value Editor" {onclose}>
+<DialogModal {title} {onclose}>
     {#snippet icon()}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 56 56">
             <path d="M0 0h56v56H0z" fill="none" />
@@ -70,7 +93,7 @@
         </svg>
     {/snippet}
 
-    {#if hasDuplicates}
+    {#if hasDuplicates && !allowDuplicates}
         <Admonition>
             The following values are duplicated:
             <ul>
@@ -82,7 +105,7 @@
         </Admonition>
     {/if}
 
-    <div class="editor">
+    <div class="editor" bind:this={editorRef}>
         {#each draftValues as _, index (index)}
             <div class="editor-row" class:duplicate={duplicateValues.has(draftValues[index].trim().toLowerCase()) && draftValues[index].trim() !== ""}>
                 <Text bind:value={draftValues[index]} {placeholder} />
@@ -102,7 +125,7 @@
             <Button onclick={addRow}>Add Row</Button>
         </div>
         <Button onclick={onclose}>Close</Button>
-        <Button primary onclick={() => onsave?.(draftValues)} disabled={hasDuplicates}>Save</Button>
+        <Button primary onclick={() => onsave?.(draftValues)} disabled={!canSave}>Save</Button>
     {/snippet}
 </DialogModal>
 

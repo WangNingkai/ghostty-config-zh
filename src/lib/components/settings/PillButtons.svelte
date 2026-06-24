@@ -49,7 +49,7 @@
 <style>
 .pill-group {
     display: inline-flex;
-    border-radius: var(--radius-level-4, 6px);
+    border-radius: var(--radius-level-4);
     border: 1px solid rgba(255,255,255,0.13);
     background: rgba(255,255,255,0.06);
     padding: 2px;
@@ -58,11 +58,11 @@
 
 .pill {
     border: none;
-    border-radius: calc(var(--radius-level-4, 6px) - 2px);
+    border-radius: calc(var(--radius-level-4) - 2px);
     padding: 2px 10px;
     font-size: 0.85em;
     font-family: inherit;
-    color: var(--font-color-muted, rgba(255,255,255,0.45));
+    color: var(--font-color-muted);
     background: transparent;
     cursor: pointer;
     transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
@@ -77,24 +77,24 @@
 
 .pill:hover:not(.active) {
     background: rgba(255,255,255,0.10);
-    color: var(--font-color, #e0d9f0);
+    color: var(--font-color);
 }
 
 .pill.active {
     background: rgba(255,255,255,0.14);
-    color: var(--font-color, #e0d9f0);
+    color: var(--font-color);
     box-shadow: 0 1px 3px rgba(0,0,0,0.35);
 }
 
 .pill.active.accent {
-    background: color-mix(in srgb, var(--color-accent, #6c8fff) 22%, transparent);
-    color: var(--color-accent, #6c8fff);
+    background: color-mix(in srgb, var(--font-color-accent) 22%, transparent);
+    color: var(--font-color-accent);
     box-shadow: 0 1px 3px rgba(0,0,0,0.35);
 }
 
 .pill.active.danger{
-    background: color-mix(in srgb, var(--color-danger, #e05c5c) 18%, transparent);
-    color: var(--color-danger, #e05c5c);
+    background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+    color: var(--color-danger);
     box-shadow: 0 1px 3px rgba(0,0,0,0.35);
 }
 </style>

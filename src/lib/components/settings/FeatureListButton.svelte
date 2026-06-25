@@ -1,6 +1,11 @@
 <script lang="ts">
     import Button from "../Button.svelte";
-    import FeatureListModal from "../modals/FeatureListModal.svelte";
+    import CheckListIcon from "../icons/CheckListIcon.svelte";
+    import DialogModal from "../modals/DialogModal.svelte";
+    import Group from "./Group.svelte";
+    import Item from "./Item.svelte";
+    import Separator from "./Separator.svelte";
+    import Switch from "./Switch.svelte";
 
 
     interface Feature {
@@ -70,11 +75,25 @@
 
 <svelte:document onkeydown={handleEditorKeydown} />
 
+
 {#if isEditorOpen}
-    <FeatureListModal
-        bind:draftState
-        {features}
-        onsave={onEditorSave}
-        onclose={closeEditor}
-    />
+    <DialogModal title="Feature List Editor" onclose={closeEditor}>
+        {#snippet icon()}
+            <CheckListIcon />
+        {/snippet}
+
+        <Group>
+            {#each features as feature, i (feature.id)}
+                <Item name={feature.label} isNonDefault={draftState[feature.id] !== feature.default} onReset={() => draftState[feature.id] = feature.default}>
+                    <Switch bind:checked={draftState[feature.id]} />
+                </Item>
+                {#if i < features.length - 1}<Separator />{/if}
+            {/each}
+        </Group>
+
+        {#snippet footer()}
+            <Button onclick={closeEditor}>Close</Button>
+            <Button primary onclick={onEditorSave}>Save</Button>
+        {/snippet}
+    </DialogModal>
 {/if}

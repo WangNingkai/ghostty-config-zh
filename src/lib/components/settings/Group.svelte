@@ -13,11 +13,13 @@
 </script>
 
 <div class="setting-group" class:borderless style:flex={flex ? flex : ""}>
-    <div class="group-info">
-        {#if title}<h2>{title}</h2>{/if}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-        {#if note}<h4>{@html note}</h4>{/if}
-    </div>
+    {#if title || note}
+        <div class="group-info">
+            {#if title}<h2>{title}</h2>{/if}
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+            {#if note}<h4>{@html note}</h4>{/if}
+        </div>
+    {/if}
     <div class="settings-items" style:flex style:height={flex ? "100%" : null}>
         {@render children()}
     </div>
@@ -82,5 +84,13 @@ h4 :global(code) {
     box-shadow: none;
     padding: 0;
     margin: 0;
+}
+
+:global(.dialog-body) > .setting-group:first-child:not(:has(.group-info)) > .settings-items {
+    margin-top: 12px;
+}
+
+:global(.dialog-body) > .setting-group:last-child > .settings-items {
+    margin-bottom: 6px;
 }
 </style>

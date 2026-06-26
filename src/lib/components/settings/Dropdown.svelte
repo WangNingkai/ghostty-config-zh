@@ -47,7 +47,7 @@
         emptyLabel?: string;
         noResultsLabel?: string;
         disabled?: boolean;
-        change?: () => void;
+        change?: (v: string) => void;
     };
 
     /* eslint-disable prefer-const */
@@ -283,7 +283,7 @@
 
     function commitChange(nextValue: string) {
         value = nextValue;
-        if (change) change();
+        if (change) change(nextValue);
     }
 
     function selectOption(option: DropdownOption) {

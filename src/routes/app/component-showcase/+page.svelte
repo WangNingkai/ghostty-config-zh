@@ -45,6 +45,7 @@
         numberDual: string;
         numberDualLinked: string;
         numberCustom: string;
+        numberCustomAdvanced: string;
         rangeBasic: number;
         rangeLabeled: number;
         textBasic: string;
@@ -70,7 +71,8 @@
         numberWithUnits: "10px",
         numberDual: "80,60",
         numberDualLinked: "50",
-        numberCustom: "glass",
+        numberCustom: "macos-glass-regular",
+        numberCustomAdvanced: "0.5",
         rangeBasic: 42,
         rangeLabeled: 0.4,
         textBasic: "Hello, world!",
@@ -169,9 +171,25 @@
             <CustomNumber
                 bind:value={values.numberCustom}
                 presets={[
-                    {value: "off", label: "Off"},
-                    {value: "on", label: "On"},
-                    {value: "glass", label: "Glass"},
+                    {value: "false", label: "Off"},
+                    {value: "true", label: "On"},
+                    {value: "macos-glass-regular", label: "Regular Glass"},
+                    {value: "macos-glass-clear", label: "Clear Glass"},
+                ]}
+            />
+        </Item>
+        <Separator />
+        <Item name="Custom Number" note="Supports both custom numbers and predefined special values. Currently: {values.numberCustomAdvanced}">
+            <CustomNumber
+                bind:value={values.numberCustomAdvanced}
+                min={0}
+                max={1}
+                step={0.01}
+                presets={[
+                    {value: "false", label: "Off", description: "Equivalent to default intensity of 0"},
+                    {value: "true", label: "On", description: "Equivalent to default intensity of 20"},
+                    {value: "macos-glass-regular", label: "Regular Glass", description: "Standard glass effect (macOS 26.0+)"},
+                    {value: "macos-glass-clear", label: "Clear Glass", description: "Highly transparent glass effect (macOS 26.0+)"},
                 ]}
             />
         </Item>

@@ -26,6 +26,7 @@
     import CustomColor from "$lib/components/settings/CustomColor.svelte";
     import DualNumber from "$lib/components/settings/DualNumber.svelte";
     import Duration from "$lib/components/settings/Duration.svelte";
+    import CustomNumber from "$lib/components/settings/CustomNumber.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -43,6 +44,7 @@
         numberWithUnits: string;
         numberDual: string;
         numberDualLinked: string;
+        numberCustom: string;
         rangeBasic: number;
         rangeLabeled: number;
         textBasic: string;
@@ -68,6 +70,7 @@
         numberWithUnits: "10px",
         numberDual: "80,60",
         numberDualLinked: "50",
+        numberCustom: "glass",
         rangeBasic: 42,
         rangeLabeled: 0.4,
         textBasic: "Hello, world!",
@@ -160,6 +163,17 @@
         <Separator />
         <Item name="Dual Number ({values.numberDualLinked})" note="Two linked number inputs for related values, e.g. width and height.">
             <DualNumber bind:value={values.numberDualLinked} labels={["X", "Y"]} min={0} max={1000} step={1} />
+        </Item>
+        <Separator />
+        <Item name="Custom Number" note="Supports both custom numbers and predefined special values. Currently: {values.numberCustom}">
+            <CustomNumber
+                bind:value={values.numberCustom}
+                presets={[
+                    {value: "off", label: "Off"},
+                    {value: "on", label: "On"},
+                    {value: "glass", label: "Glass"},
+                ]}
+            />
         </Item>
     </Group>
 

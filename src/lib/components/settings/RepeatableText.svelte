@@ -1,4 +1,5 @@
 <script lang="ts">
+    import {getSetting} from "$lib/contexts";
     import RepeatableInputModal from "../modals/RepeatableInputModal.svelte";
     import Text from "./Text.svelte";
 
@@ -14,6 +15,7 @@
         canReorder = true, // eslint-disable-line prefer-const
     }: Props = $props();
 
+    const settingInfo = getSetting();
     let isEditorOpen = $state(false);
     let draftValues = $state<string[]>([]);
 
@@ -59,6 +61,7 @@
 {#if isEditorOpen}
     <RepeatableInputModal
         bind:draftValues
+        title={settingInfo?.name ?? "Repeatable Value Editor"}
         onsave={onEditorSave}
         {placeholder}
         {canReorder}

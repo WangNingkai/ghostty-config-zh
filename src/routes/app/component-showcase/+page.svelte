@@ -27,6 +27,7 @@
     import DualNumber from "$lib/components/settings/DualNumber.svelte";
     import Duration from "$lib/components/settings/Duration.svelte";
     import CustomNumber from "$lib/components/settings/CustomNumber.svelte";
+    import ScrollMultiplier from "$lib/components/settings/ScrollMultiplier.svelte";
 
     if (!dev) error(404, "Not found");
 
@@ -47,6 +48,7 @@
         numberDualLinked: string;
         numberCustom: string;
         numberCustomAdvanced: string;
+        numberMultiplier: string;
         rangeBasic: number;
         rangeLabeled: number;
         textBasic: string;
@@ -75,6 +77,7 @@
         numberDualLinked: "50",
         numberCustom: "macos-glass-regular",
         numberCustomAdvanced: "0.5",
+        numberMultiplier: "precision:1,discrete:3",
         rangeBasic: 42,
         rangeLabeled: 0.4,
         textBasic: "Hello, world!",
@@ -179,6 +182,10 @@
         <Separator />
         <Item name="Dual Number ({values.numberDualLinked})" note="Two linked number inputs for related values, e.g. width and height.">
             <DualNumber bind:value={values.numberDualLinked} labels={["X", "Y"]} min={0} max={1000} step={1} />
+        </Item>
+        <Separator />
+        <Item name="Scroll Multiplier" note="Adjusts the scroll multiplier. Currently: {values.numberMultiplier}">
+            <ScrollMultiplier bind:value={values.numberMultiplier} />
         </Item>
         <Separator />
         <Item name="Custom Number" note="Supports both custom numbers and predefined special values. Currently: {values.numberCustom}">

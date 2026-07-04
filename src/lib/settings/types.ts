@@ -88,6 +88,97 @@ interface KeybindsSetting extends SettingInfo {
     default: KeybindString[];
 }
 
+// --- Phase A0: new-component widget types (see notes/plans/settings-component-integration.md §1) ---
+// These `type` members are intentionally temporary plumbing for the existing type-based renderer.
+// Phase A migrates widget selection into navigation (WidgetDef) and removes them. Keep minimal.
+
+export type PillVariant = "neutral" | "accent" | "danger";
+
+export interface PillOption {
+    label: string;
+    value: string;
+    variant?: PillVariant;
+}
+
+export interface FeatureDef {
+    id: string; // e.g. 'cursor', 'sudo'
+    label: string; // e.g. 'Cursor', 'Sudo'
+    default: boolean; // the actual Ghostty default for this feature
+    description?: string;
+}
+
+// A preset/"special" value for CustomColor / CustomNumber (structurally CustomInput's Preset).
+export interface SpecialValue {
+    value: string; // e.g. 'bright', 'cell-foreground', 'macos-glass-regular'
+    label: string; // e.g. 'Bright', 'Cell FG', 'Regular'
+    variant?: PillVariant;
+}
+
+interface RepeatableTextSetting extends SettingInfo {
+    type: "repeatable-text";
+    default: string[];
+    placeholder?: string;
+    canReorder?: boolean;
+}
+
+interface FeatureListSetting extends SettingInfo {
+    type: "feature-list";
+    default: string;
+    features: FeatureDef[];
+}
+
+interface PillSetting extends SettingInfo {
+    type: "pill";
+    default: string;
+    options: PillOption[];
+}
+
+interface DurationSetting extends SettingInfo {
+    type: "duration";
+    default: string;
+    allowEmpty?: boolean;
+    placeholder?: string;
+}
+
+interface DualNumberSetting extends SettingInfo {
+    type: "dual-number";
+    default: string;
+    labels: [string, string];
+    min?: number;
+    max?: number;
+    step?: number;
+}
+
+interface CustomColorSetting extends SettingInfo {
+    type: "custom-color";
+    default: string;
+    presets: SpecialValue[];
+    widget?: "dropdown" | "pills";
+}
+
+interface CustomNumberSetting extends SettingInfo {
+    type: "custom-number";
+    default: string;
+    presets: SpecialValue[];
+    min?: number;
+    max?: number;
+    step?: number;
+    size?: number;
+    placeholder?: string;
+    integer?: boolean;
+    widget?: "dropdown" | "pills";
+}
+
+interface ScrollMultiplierSetting extends SettingInfo {
+    type: "scroll-multiplier";
+    default: string;
+}
+
+interface NumberUnitsSetting extends SettingInfo {
+    type: "number-units";
+    default: string;
+}
+
 export type SettingDef =
     | SwitchSetting
     | TextSetting
@@ -97,7 +188,16 @@ export type SettingDef =
     | ColorSetting
     | PaletteSetting
     | ThemeSetting
-    | KeybindsSetting;
+    | KeybindsSetting
+    | RepeatableTextSetting
+    | FeatureListSetting
+    | PillSetting
+    | DurationSetting
+    | DualNumberSetting
+    | CustomColorSetting
+    | CustomNumberSetting
+    | ScrollMultiplierSetting
+    | NumberUnitsSetting;
 
 export type TypeToValue<T extends SettingDef["type"]> = Extract<SettingDef, {type: T;}>["default"];
 

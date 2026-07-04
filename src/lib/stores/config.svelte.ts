@@ -34,6 +34,14 @@ export function diff() {
             }
             if (toAdd.length) output[settingKey] = toAdd;
         }
+        else if (Array.isArray(config[settingId])) {
+            // Generic repeatable string[] settings (e.g. font-family): emit the whole list when
+            // it differs from the default, one config line per entry (see serialize()).
+            const cur = config[settingId] as string[];
+            const def = defaults[settingId] as string[];
+            const changed = cur.length !== def.length || cur.some((v, i) => v !== def[i]);
+            if (changed) output[settingKey] = cur.filter(v => v.trim() !== "");
+        }
         else if (config[settingId] != defaults[settingId]) {
             output[settingKey] = config[settingId];
         }
@@ -64,6 +72,12 @@ export function diffFromDefaults(conf: Partial<SettingValues>) {
                 toAdd.push(`${p}=${conf[settingId][p]}`);
             }
             if (toAdd.length) output[settingKey] = toAdd;
+        }
+        else if (Array.isArray(conf[settingId])) {
+            const cur = conf[settingId] as string[];
+            const def = defaults[settingId] as string[];
+            const changed = cur.length !== def.length || cur.some((v, i) => v !== def[i]);
+            if (changed) output[settingKey] = cur.filter(v => v.trim() !== "");
         }
         else if (conf[settingId] != defaults[settingId]) {
             output[settingKey] = conf[settingId];

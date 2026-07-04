@@ -1,4 +1,5 @@
 import type {KeybindString} from "$lib/settings/types";
+import {registry} from "$lib/settings/registry";
 import type {HexColor} from "./colors";
 
 const re = /^\s*([a-z-]+)[\s]*=\s*(.*)\s*$/;
@@ -41,11 +42,19 @@ export function parse(configString: string) {
                 newKey += split[s].substring(1);
             }
 
-            if (colors.includes(key) && value.length === 6 && !value.startsWith("#")) {
-                results[newKey] = `#${value}`;
+            const normalized = colors.includes(key) && value.length === 6 && !value.startsWith("#")
+                ? `#${value}`
+                : value;
+
+            // Repeatable settings (e.g. font-family) may appear on multiple lines; accumulate
+            // them into an array rather than letting later lines overwrite earlier ones.
+            if (registry[newKey as keyof typeof registry]?.type === "repeatable-text") {
+                const existing = results[newKey];
+                if (Array.isArray(existing)) existing.push(normalized);
+                else results[newKey] = [normalized];
             }
             else {
-                results[newKey] = value;
+                results[newKey] = normalized;
             }
         }
     }

@@ -111,6 +111,7 @@ export interface FeatureDef {
 export interface SpecialValue {
     value: string; // e.g. 'bright', 'cell-foreground', 'macos-glass-regular'
     label: string; // e.g. 'Bright', 'Cell FG', 'Regular'
+    description?: string;
     variant?: PillVariant;
 }
 

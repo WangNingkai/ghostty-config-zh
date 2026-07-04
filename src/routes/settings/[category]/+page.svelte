@@ -108,7 +108,7 @@
                         {:else if setting.type === "dual-number"}
                             <DualNumber bind:value={config[settingId] as string} labels={setting.labels} min={setting.min} max={setting.max} step={setting.step} />
                         {:else if setting.type === "custom-color"}
-                            <CustomColor bind:value={config[settingId] as string} presets={setting.presets} widget={setting.widget} />
+                            <CustomColor bind:value={config[settingId] as string} presets={setting.presets} widget={setting.widget} default={setting.default as HexColor} />
                         {:else if setting.type === "custom-number"}
                             <CustomNumber bind:value={config[settingId] as string} presets={setting.presets} min={setting.min} max={setting.max} step={setting.step} size={setting.size} placeholder={setting.placeholder} integer={setting.integer} widget={setting.widget} />
                         {:else if setting.type === "scroll-multiplier"}

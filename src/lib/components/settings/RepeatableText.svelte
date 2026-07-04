@@ -50,10 +50,10 @@
 </script>
 
 <div class="repeatable-setting">
-    <Text bind:value={value[0]} {placeholder} size={15} onfocus={openEditor} />
-     {#if hiddenCount > 0}
+    {#if hiddenCount > 0}
         <span class="more">+{hiddenCount} more</span>
     {/if}
+    <Text bind:value={value[0]} {placeholder} size={15} onfocus={openEditor} />
 </div>
 
 <svelte:document onkeydown={handleEditorKeydown} />
@@ -72,17 +72,16 @@
 <style>
 .repeatable-setting {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
     gap: 8px;
     max-width: 380px;
-    position: relative;
 }
 
 .more {
     color: var(--font-color-muted);
-    position: absolute;
-    right: 4px;
-    bottom: -100%;
     font-size: 0.9rem;
+    white-space: nowrap;
 }
 </style>

@@ -28,6 +28,9 @@
     import Duration from "$lib/components/settings/Duration.svelte";
     import CustomNumber from "$lib/components/settings/CustomNumber.svelte";
     import CustomDuration from "$lib/components/settings/CustomDuration.svelte";
+    import DualTheme from "$lib/components/settings/DualTheme.svelte";
+    import {themes} from "$lib/data/themes";
+    import {themeIcon} from "$lib/utils/themes";
     import ScrollMultiplier from "$lib/components/settings/ScrollMultiplier.svelte";
 
     if (!dev) error(404, "Not found");
@@ -57,6 +60,7 @@
         textDuration: string;
         textDurationNullable: string;
         durationCustom: string;
+        dualTheme: string;
         pillButtons: string;
         featureList: string;
         radioBasic: string;
@@ -87,10 +91,13 @@
         textDuration: "1h30m",
         textDurationNullable: "",
         durationCustom: "off",
+        dualTheme: "light:Rose Pine Dawn,dark:Rose Pine",
         pillButtons: "default",
         featureList: "",
         radioBasic: "option1",
     });
+
+    const themeOptions = Object.entries(themes).map(([name, scheme]) => ({name, value: name, icon: themeIcon(scheme)}));
 </script>
 
 <Page title="Component Showcase">
@@ -147,6 +154,10 @@
         <Separator />
         <Item name="Structured options" note="Supports labels and separators between logical sections.">
             <Dropdown bind:value={values.dropdownRich} groups={richOptions} searchable allowEmpty placeholder="Select grouped option" />
+        </Item>
+        <Separator />
+        <Item name="Dual Theme" note="One global theme, or link off to set a separate theme per light/dark mode. Currently: {values.dualTheme}">
+            <DualTheme bind:value={values.dualTheme} options={themeOptions} />
         </Item>
     </Group>
     <Group>

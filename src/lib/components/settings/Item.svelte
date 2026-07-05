@@ -83,7 +83,6 @@
     // Give the setting context so that child components can access the setting info if needed
     (() => {
         setSetting({
-            key: settingId || "",
             name,
             note,
             platform,

@@ -47,7 +47,7 @@
 
         // TODO: consider honoring separate fonts for bold/italic and such in previews
         // Add font settings
-        add("font-family", config.fontFamily.filter(Boolean).join(", ") || "JetBrainsMono Nerd Font");
+        add("font-family", config.fontFamily.filter(Boolean).map(f => JSON.stringify(f)).join(", ") || JSON.stringify("JetBrainsMono Nerd Font"));
         add("font-size", `${config.fontSize}px`);
 
         return str;

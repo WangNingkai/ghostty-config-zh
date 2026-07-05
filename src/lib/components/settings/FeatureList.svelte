@@ -70,6 +70,7 @@
     }
 
     function onEditorSave() {
+        // Commit the draft state to the actual value since relying on derived didn't work for some reason
         states = {...draftState};
         value = serialize(states);
         closeEditor();

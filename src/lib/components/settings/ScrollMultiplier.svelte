@@ -7,7 +7,7 @@
     function parse(raw: string): string {
         // translate scroll-multiplier's format into DualNumber's "a,b" or "a" format
         const trimmed = raw.trim();
-        if (trimmed === "") return "precision:1,discrete:3"; // default discrete=3, precision=1... see below
+        if (trimmed === "") return "1,3"; // default discrete=3, precision=1... see below
         if (!trimmed.includes(":")) return trimmed; // already bare/uniform
         let discrete = 3, precision = 1;
         for (const part of trimmed.split(",").map(p => p.trim())) {

@@ -1166,7 +1166,7 @@ export const registry = {
         type: "switch"
     },
     mouseScrollMultiplier: {
-        default: "3",
+        default: "precision:1,discrete:3",
         description: "Multiplier for scrolling distance with the mouse wheel. Can be prefixed with `precision:` or `discrete:` to set the multiplier only for specific device types, comma-separated. If no prefix is used, the multiplier applies to all devices.\n\nDefault is 3 for discrete devices and 1 for precision devices. Value will be clamped to [0.01, 10000].",
         key: "mouse-scroll-multiplier",
         name: "Mouse scroll multiplier",

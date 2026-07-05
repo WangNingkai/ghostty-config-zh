@@ -56,6 +56,10 @@
         const seenUnits = new SvelteSet<string>();
 
         while (remaining.length > 0) {
+            // Skip whitespace between segments
+            remaining = remaining.trim();
+            if (remaining.length === 0) break;
+
             // Must start with a positive integer
             const numMatch = remaining.match(/^(\d+)/);
             if (!numMatch) {

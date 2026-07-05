@@ -26,12 +26,12 @@
     let first = $state("");
     let second = $state("");
     let linked = $state(false);
-    (() => {
+    $effect(() => {
         const initial = parse(value);
         first = initial.first;
         second = initial.second;
         linked = initial.linked;
-    })();
+    });
 
     function commit() {
         value = serialize({first, second, linked});

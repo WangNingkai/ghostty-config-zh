@@ -3,6 +3,8 @@
 
     interface Props {
         primary?: boolean;
+        danger?: boolean;
+        icon?: boolean;
         onclick?: (e: MouseEvent) => void | Promise<void>;
         disabled?: boolean;
         type?: "button" | "submit" | "reset";
@@ -12,6 +14,8 @@
 
     const {
         primary = false,
+        danger = false,
+        icon = false,
         onclick,
         disabled = false,
         type = "button",
@@ -22,6 +26,8 @@
 
 <button
     class:primary
+    class:danger
+    class:icon
     {onclick}
     {disabled}
     {type}
@@ -51,6 +57,15 @@
     button.primary {
         background: linear-gradient(0deg, #3C6EC9, #437AE2);
         padding: 4px 20px;
+    }
+
+    button.icon {
+        padding: 4px;
+    }
+
+    button.danger {
+        background: linear-gradient(0deg, color-mix(in srgb, var(--color-danger) 82%, #000), var(--color-danger));
+        color: #fff;
     }
 
     button:disabled {

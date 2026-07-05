@@ -111,10 +111,16 @@
                 <Text bind:value={draftValues[index]} {placeholder} />
                 <div class="row-actions">
                     {#if canReorder}
-                        <Button type="button" title="Move up" onclick={() => moveUp(index)} disabled={index === 0}>↑</Button>
-                        <Button type="button" title="Move down" onclick={() => moveDown(index)} disabled={index === draftValues.length - 1}>↓</Button>
+                        <Button icon type="button" title="Move up" onclick={() => moveUp(index)} disabled={index === 0}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6" /></svg>
+                        </Button>
+                        <Button icon type="button" title="Move down" onclick={() => moveDown(index)} disabled={index === draftValues.length - 1}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                        </Button>
                     {/if}
-                    <Button type="button" title="Remove" onclick={() => removeRow(index)}>−</Button>
+                    <Button icon danger type="button" title="Remove" onclick={() => removeRow(index)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                    </Button>
                 </div>
             </div>
         {/each}

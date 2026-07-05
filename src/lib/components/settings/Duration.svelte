@@ -23,10 +23,11 @@
         value: string;
         nullable?: boolean; // if true, empty string is valid (means "unset")
         placeholder?: string; // overrides default placeholder
+        disabled?: boolean; // if true, disables the input
     }
 
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(""), nullable = false, placeholder = ""}: Props = $props();
+    let {value = $bindable(""), nullable = false, placeholder = "", disabled = false}: Props = $props();
 
     // TODO: move somewhere else?
     const UNITS: DurationUnit[] = [
@@ -57,8 +58,8 @@
 
         while (remaining.length > 0) {
             // Skip whitespace between segments
-            remaining = remaining.trim();
-            if (remaining.length === 0) break;
+            // remaining = remaining.trim();
+            // if (remaining.length === 0) break;
 
             // Must start with a positive integer
             const numMatch = remaining.match(/^(\d+)/);
@@ -148,6 +149,7 @@
             spellcheck="false"
             autocomplete="off"
             size={Math.max(internalValue.length, 8) - 2}
+            {disabled}
         />
         <!-- <span class="format-hint">y d h m s ms us ns</span> -->
     </div>

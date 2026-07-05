@@ -29,7 +29,7 @@
 
 
     const duplicateValues = $derived((() => {
-        const counts: Record<string, number> = {};
+        const counts: Record<string, number> = Object.create(null) as Record<string, number>;
         for (const item of draftValues) {
             const normalized = item.trim().toLowerCase();
             if (!normalized) continue;

@@ -28,6 +28,16 @@
 
     function parse(raw: string): Record<string, boolean> {
         const result: Record<string, boolean> = {};
+
+        // Handle the special case of "true" or "false" to set all features to on/off
+        const trimmed = raw.trim().toLowerCase();
+        if (trimmed === "true" || trimmed === "false") {
+            const val = trimmed === "true";
+            for (const f of features) result[f.id] = val;
+            return result;
+        }
+
+        // Otherwise, parse the comma-separated list of feature IDs, with optional "no-" prefix for negation
         for (const f of features) result[f.id] = f.default;
         for (const token of raw.split(",").map(t => t.trim()).filter(Boolean)) {
             const isNegation = token.startsWith("no-");

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import CustomInput, {type Preset} from "./CustomInput.svelte";
+    import CustomInput, {type ControlProps, type Preset} from "./CustomInput.svelte";
     import Duration from "./Duration.svelte";
 
     interface Props {
@@ -19,7 +19,10 @@
     {presets}
     {widget}
 >
-    {#snippet control(customDuration: string, setCustom: (next: string) => void)}
-        <Duration bind:value={() => customDuration, setCustom} {nullable} {placeholder} />
+    <!-- TODO: figure out why eslint can't resolve this -->
+    <!-- eslint-disable @typescript-eslint/no-unsafe-return -->
+    {#snippet control({value: customDuration, onChange: setCustom, disabled}: ControlProps)}
+        <Duration bind:value={() => customDuration, setCustom} {nullable} {placeholder} {disabled} />
     {/snippet}
+    <!-- eslint-enable @typescript-eslint/no-unsafe-return -->
 </CustomInput>

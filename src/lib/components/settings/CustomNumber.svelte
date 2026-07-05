@@ -1,5 +1,5 @@
 <script lang="ts">
-    import CustomInput, {type Preset} from "./CustomInput.svelte";
+    import CustomInput, {type Preset, type ControlProps} from "./CustomInput.svelte";
     import Number from "./Number.svelte";
 
     interface Props {
@@ -24,11 +24,14 @@
     {widget}
     customDefault="0"
 >
-    {#snippet control(customNumber: string, setCustom: (next: string) => void)}
+    <!-- TODO: figure out why eslint can't resolve this -->
+    <!-- eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call -->
+    {#snippet control({value: customNumber, onChange: setCustom, disabled}: ControlProps)}
         <Number
             value={customNumber === "" ? undefined : (integer ? parseInt(customNumber, 10) : parseFloat(customNumber))}
             onchange={(n: number | undefined) => setCustom(n === undefined ? "" : n.toString())}
-            {min} {max} {step} {size} {placeholder} {integer}
+            {min} {max} {step} {size} {placeholder} {integer} {disabled}
         />
     {/snippet}
+    <!-- eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call -->
 </CustomInput>

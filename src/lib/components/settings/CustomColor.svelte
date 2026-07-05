@@ -1,7 +1,7 @@
 <script lang="ts">
     import type {HexColor} from "$lib/utils/colors";
     import Color from "./Color.svelte";
-    import CustomInput, {type Preset} from "./CustomInput.svelte";
+    import CustomInput, {type Preset, type ControlProps} from "./CustomInput.svelte";
 
     interface Props {
         value: string; // hex color, special string, or '' (unset)
@@ -20,7 +20,7 @@
     {widget}
     customDefault={defaultValue ?? "#ffffff"}
 >
-    {#snippet control(customColor: string, onColorChange)}
-        <Color bind:value={() => (customColor || "#ffffff") as HexColor, onColorChange} {defaultValue} />
+    {#snippet control({value: innerValue, onChange, disabled}: ControlProps)}
+        <Color bind:value={() => (innerValue || "#ffffff") as HexColor, onChange} {defaultValue} {disabled} />
     {/snippet}
 </CustomInput>

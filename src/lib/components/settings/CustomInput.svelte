@@ -4,6 +4,12 @@
         label: string; // e.g. 'Bright', 'Transparent', 'Off'
         description?: string; // optional description for the preset
     }
+
+    export interface ControlProps {
+        disabled?: boolean; // whether the inner control should be disabled
+        value: string; // the inner control's string value, a preset value, or '' (unset)
+        onChange: (next: string) => void; // called when the inner control's value changes
+    }
 </script>
 
 <script lang="ts">
@@ -16,7 +22,7 @@
         presets: Preset[]; // which special values this setting supports
         widget?: "dropdown" | "pills"; // default: pills if 2 or fewer presets, dropdown if more than 2
         customDefault?: string; // string to seed the custom control with when value is currently a preset
-        control: Snippet<[string, (next: string) => void]>; // renders the inner custom control
+        control: Snippet<[ControlProps]>; // renders the inner custom control
     }
 
     // eslint-disable-next-line prefer-const
@@ -24,7 +30,7 @@
 
     const isPreset = (v: string): boolean => presets.some(s => s.value === v);
 
-    let mode = $derived(isPreset(value) ? value : "custom");
+    const mode = $derived(isPreset(value) ? value : "custom");
 
     // Use an iife because svelte linting
     let customValue = $state<string>((() => isPreset(value) ? customDefault : value)());
@@ -54,7 +60,7 @@
     // Track changes coming from the inner custom control
     function onCustomChange(next: string) {
         customValue = next;
-        if (mode !== "custom") mode = "custom"; // switch to custom mode if not already there
+        if (mode !== "custom") return; // don't allow the inner control to change the value if we're not in custom mode
         value = customValue;
     }
 </script>
@@ -69,7 +75,7 @@
     {/if}
 
     <div class="custom-wrapper" class:dimmed={mode !== "custom"}>
-        {@render control(customValue, onCustomChange)}
+        {@render control({value: customValue, onChange: onCustomChange, disabled: mode !== "custom"})}
     </div>
 
     {#if !shouldUseDropdown}

@@ -10,11 +10,12 @@
         placeholder?: string;
         integer?: boolean;
         onchange?: (value: number | undefined) => void;
+        disabled?: boolean;
     };
 
     // why is eslint like this smh
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(), min, max, step = 1, size, placeholder, integer = true, onchange}: Props = $props();
+    let {value = $bindable(), min, max, step = 1, size, placeholder, integer = true, onchange, disabled}: Props = $props();
 
 
     const wasInitiallyUndefined = value === undefined;
@@ -149,12 +150,13 @@
         oninput={handleInput}
         onkeydown={handleKeyDown}
         onblur={onBlur}
+        {disabled}
     />
     <div class="steppers">
-        <button type="button" class="stepper up" onclick={increment} aria-label="Increment">
+        <button type="button" class="stepper up" onclick={increment} aria-label="Increment" {disabled}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6" /></svg>
         </button>
-        <button type="button" class="stepper down" onclick={decrement} aria-label="Decrement">
+        <button type="button" class="stepper down" onclick={decrement} aria-label="Decrement" {disabled}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6" /></svg>
         </button>
     </div>

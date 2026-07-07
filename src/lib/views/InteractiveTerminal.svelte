@@ -240,7 +240,7 @@
 
         term = new Terminal({
             fontSize: config.fontSize || 13,
-            fontFamily: config.fontFamily.filter(Boolean).map(f => JSON.stringify(f)).join(", ") || JSON.stringify("JetBrainsMono Nerd Font") + ", monospace",
+            fontFamily: (config.fontFamily.filter(Boolean).map(f => JSON.stringify(f)).join(", ") || JSON.stringify("JetBrainsMono Nerd Font")) + ", monospace",
             theme: getTheme(),
             convertEol: true,
             scrollback: 1000,

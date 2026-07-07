@@ -35,6 +35,14 @@
     // Use an iife because svelte linting
     let customValue = $state<string>((() => isPreset(value) ? customDefault : value)());
 
+    // Use an effect to keep the customValue in sync with the value prop, but only if the value is not a preset
+    // This allows the customValue to be updated when the value prop changes, but not when the user is actively editing the custom control
+    $effect(() => {
+        if (isPreset(value)) return; // if the value is a preset, don't change the customValue
+        if (value === customValue) return; // if the value is already the same as the customValue, don't change it
+        customValue = value;
+    });
+
     const shouldUseDropdown = $derived.by(() => {
         if (widget === "dropdown") return true;
         if (widget === "pills") return false;

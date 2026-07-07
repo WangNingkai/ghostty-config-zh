@@ -1433,7 +1433,7 @@ export const registry = {
         default: "",
         description: "Background color for selection. If not set, the selection color is the inverted window background/foreground. Specified as hex or named X11 color. Since 1.2.0, can be set to `cell-foreground` or `cell-background`.",
         key: "selection-background",
-        name: "Selection background color",
+        name: "Selection background",
         presets: [{value: "cell-foreground", label: "Cell FG"}, {value: "cell-background", label: "Cell BG"}],
         type: "custom-color"
     },
@@ -1456,7 +1456,7 @@ export const registry = {
         default: "",
         description: "Foreground color for selection. If not set, the selection color is the inverted window background/foreground. Specified as hex or named X11 color. Since 1.2.0, can be set to `cell-foreground` or `cell-background`.",
         key: "selection-foreground",
-        name: "Selection foreground color",
+        name: "Selection foreground",
         presets: [{value: "cell-foreground", label: "Cell FG"}, {value: "cell-background", label: "Cell BG"}],
         type: "custom-color"
     },

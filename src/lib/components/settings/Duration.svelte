@@ -1,6 +1,4 @@
 <script lang="ts">
-    import {SvelteSet} from "svelte/reactivity";
-
     interface DurationUnit {
         suffix: string;
         label: string;
@@ -54,7 +52,9 @@
 
         const segments: ParsedSegment[] = [];
         let remaining = trimmed;
-        const seenUnits = new SvelteSet<string>();
+        // This doesn't need to be reactive currently
+        // eslint-disable-next-line svelte/prefer-svelte-reactivity
+        const seenUnits = new Set<string>();
 
         while (remaining.length > 0) {
             // Skip whitespace between segments

@@ -106,7 +106,17 @@
     {/if}
 
     <div class="editor" bind:this={editorRef}>
-        {#each draftValues as _, index (index)}
+        <!--
+            Keyed by index intentionally: draftValues are plain strings that are neither
+            unique nor stable, so there's no natural key to derive. Text is a thin native-input
+            wrapper with no internal state or transitions, so index keying is safe here — the
+            only wart is that reordering a focused row moves focus by position rather than by row.
+            If that becomes a problem, switch to identity keys via either (a) a parallel `ids`
+            array mutated in lockstep with every add/remove/move, or (b) modelling rows as
+            {id, value} objects. Both were considered and judged not worth the bookkeeping.
+        -->
+        <!-- eslint-disable-next-line svelte/require-each-key -->
+        {#each draftValues as _, index}
             <div class="editor-row" class:duplicate={duplicateValues.has(draftValues[index].trim().toLowerCase()) && draftValues[index].trim() !== ""}>
                 <Text bind:value={draftValues[index]} {placeholder} />
                 <div class="row-actions">

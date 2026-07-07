@@ -81,15 +81,8 @@
     });
 
     // Give the setting context so that child components can access the setting info if needed
-    (() => {
-        setSetting({
-            name,
-            note,
-            platform,
-            since,
-            description: description || "",
-        });
-    })();
+    // svelte-ignore state_referenced_locally
+    setSetting({name, note, platform, since, description: description || ""});
 </script>
 
 <div

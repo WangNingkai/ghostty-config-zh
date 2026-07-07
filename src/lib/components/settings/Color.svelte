@@ -15,8 +15,8 @@
 
     // eslint-disable-next-line prefer-const
     let {value = $bindable(), size = 20, label = "", defaultValue, disabled = false}: Props = $props();
-    const borderColor = $derived(`rgba(255, 255, 255, ${luminosity(value) * 0.0027451 + 0.3})`);
-    const labelColor = $derived(isDark(value) ? `var(--font-color)` : "black");
+    const borderColor = $derived(`rgba(255, 255, 255, ${(value ? luminosity(value) : 0) * 0.0027451 + 0.3})`);
+    const labelColor = $derived(value && isDark(value) ? `var(--font-color)` : "black");
     let popoutOpen = $state(false);
 
     function click(event: Event) {

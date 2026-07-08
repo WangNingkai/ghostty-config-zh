@@ -203,3 +203,33 @@ export type SettingDef =
 export type TypeToValue<T extends SettingDef["type"]> = Extract<SettingDef, {type: T;}>["default"];
 
 export type SettingsRegistry = Record<string, SettingDef>;
+
+// Keys for the group preview components. The union lives here (data-only) so navigation can
+// reference it while the renderer-side previews map implements `Record<PreviewKey, Component>` —
+// nav keys are checked valid and the map is checked exhaustive, both against this one list.
+export type PreviewKey = "baseColor" | "cursor" | "palette" | "appIcon";
+
+// WidgetDef: widget selection + metadata, living in navigation.
+// It is data-only, a string discriminant plus plain params,
+// so navigation.ts stays free of `.svelte` imports and validateNavigation()/Bun tests stay clean.
+// Array/tuple fields are `readonly` so nav's `as const satisfies` literals assign cleanly; the
+// renderer casts to the mutable shapes its components expect at the (few) call sites that pass them.
+export type WidgetDef =
+    | {type: "switch";}
+    | {type: "text"; placeholder?: string; size?: number;}
+    | {type: "number"; min?: number; max?: number; step?: number; size?: number; placeholder?: string; integer?: boolean;}
+    | {type: "range"; min: number; max: number; step?: number; showLabels?: boolean;}
+    | {type: "dropdown"; options: ReadonlyArray<DropdownOption | string>; searchable?: boolean; allowEmpty?: boolean; emptyLabel?: string; placeholder?: string;}
+    | {type: "color";}
+    | {type: "palette";}
+    | {type: "theme"; options: ReadonlyArray<DropdownOption | string>;}
+    | {type: "keybinds";}
+    | {type: "repeatable-text"; placeholder?: string; canReorder?: boolean;}
+    | {type: "feature-list"; features: readonly FeatureDef[];}
+    | {type: "pill"; options: readonly PillOption[];}
+    | {type: "duration"; allowEmpty?: boolean; placeholder?: string;}
+    | {type: "dual-number"; labels: readonly [string, string]; min?: number; max?: number; step?: number;}
+    | {type: "custom-color"; presets: readonly SpecialValue[]; widget?: "dropdown" | "pills";}
+    | {type: "custom-number"; presets: readonly SpecialValue[]; min?: number; max?: number; step?: number; size?: number; placeholder?: string; integer?: boolean; widget?: "dropdown" | "pills";}
+    | {type: "scroll-multiplier";}
+    | {type: "number-units";};

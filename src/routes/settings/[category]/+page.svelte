@@ -15,12 +15,10 @@
     import Dropdown from "$lib/components/settings/Dropdown.svelte";
     import Color from "$lib/components/settings/Color.svelte";
     import Palette from "$lib/components/settings/Palette.svelte";
-    import BaseColorPreview from "$lib/views/BaseColorPreview.svelte";
-    import CursorPreview from "$lib/views/CursorPreview.svelte";
-    import PalettePreview from "$lib/views/PalettePreview.svelte";
     import Admonition from "$lib/components/Admonition.svelte";
     import Theme from "$lib/components/settings/Theme.svelte";
-    import AppIconPreview from "$lib/views/AppIconPreview.svelte";
+    import {previews} from "./previews";
+    import type {Component} from "svelte";
     import type {HexColor} from "$lib/utils/colors";
     import {resolve} from "$app/paths";
     import {success} from "$lib/stores/toasts.svelte";
@@ -34,7 +32,7 @@
     import CustomNumber from "$lib/components/settings/CustomNumber.svelte";
     import ScrollMultiplier from "$lib/components/settings/ScrollMultiplier.svelte";
     import NumberWithUnits from "$lib/components/settings/NumberWithUnits.svelte";
-    import {type SettingsRegistry} from "$lib/settings/types";
+    import {type DropdownOption, type FeatureDef, type PillOption, type SettingsRegistry, type SpecialValue, type WidgetDef} from "$lib/settings/types";
 
 
     const category = $derived(navigation.find(c => c.id === $page.params.category));
@@ -51,20 +49,15 @@
         {/if}
         {#each category.groups as group (group.id)}
             <Group title={group.name} note={"note" in group ? group.note : undefined}>
-                {#if category.id === "colors" && group.id === "base"}
-                    <BaseColorPreview />
-                    <Separator />
-                {:else if category.id === "colors" && group.id === "cursor"}
-                    <CursorPreview />
-                    <Separator />
-                {:else if category.id === "colors" && group.id === "palette"}
-                    <PalettePreview />
-                    <Separator />
-                {:else if category.id === "macos" && group.id === "icon"}
-                    <AppIconPreview />
+                {@const previewKey = "preview" in group ? group.preview : undefined}
+                {#if previewKey && previews[previewKey]}
+                    {@const Preview = previews[previewKey] as Component}
+                    <Preview />
                     <Separator />
                 {/if}
-                {#each group.settings as settingId, i (settingId)}
+                {#each group.settings as entry, i (i)}
+                    {@const settingId = (typeof entry === "string" ? entry : entry.id) as keyof typeof registry}
+                    {@const widget = (typeof entry === "string" ? undefined : entry.widget) as WidgetDef | undefined}
                     {@const setting = registry[settingId] as SettingsRegistry[keyof SettingsRegistry]}
                     {#if i !== 0}<Separator />{/if}
                     <Item
@@ -81,7 +74,44 @@
                             success(`${setting.name} reset to default`);
                         }}
                     >
-                        {#if setting.type === "switch"}
+                        {#if widget}
+                            <!-- Refactoring: nav-provided widget wins over the registry `type` (strangler-fig). -->
+                            {#if widget.type === "switch"}
+                                <Switch bind:checked={config[settingId] as boolean} />
+                            {:else if widget.type === "text"}
+                                <Text bind:value={config[settingId] as string} placeholder={widget.placeholder} size={widget.size} />
+                            {:else if widget.type === "range"}
+                                <Range bind:value={config[settingId] as number} min={widget.min} max={widget.max} step={widget.step} showLabels={widget.showLabels} />
+                            {:else if widget.type === "number"}
+                                <Number bind:value={config[settingId] as number} min={widget.min} max={widget.max} step={widget.step} size={widget.size} placeholder={widget.placeholder} integer={widget.integer} />
+                            {:else if widget.type === "dropdown"}
+                                <Dropdown bind:value={config[settingId] as string} options={widget.options as Array<DropdownOption | string>} placeholder={widget.placeholder} allowEmpty={widget.allowEmpty} emptyLabel={widget.emptyLabel} disabled={setting.disabled} />
+                            {:else if widget.type === "theme"}
+                                <Theme bind:value={config[settingId] as string} options={widget.options as Array<DropdownOption | string>} />
+                            {:else if widget.type === "color"}
+                                <Color defaultValue={setting.default as HexColor} bind:value={config[settingId] as HexColor} />
+                            {:else if widget.type === "palette"}
+                                <Palette defaultValue={setting.default as HexColor[]} bind:value={config[settingId] as HexColor[]} />
+                            {:else if widget.type === "repeatable-text"}
+                                <RepeatableText bind:value={config[settingId] as string[]} placeholder={widget.placeholder} canReorder={widget.canReorder} />
+                            {:else if widget.type === "feature-list"}
+                                <FeatureList bind:value={config[settingId] as string} features={widget.features as FeatureDef[]} />
+                            {:else if widget.type === "pill"}
+                                <PillButtons bind:value={config[settingId] as string} options={widget.options as PillOption[]} />
+                            {:else if widget.type === "duration"}
+                                <Duration bind:value={config[settingId] as string} nullable={widget.allowEmpty} placeholder={widget.placeholder} />
+                            {:else if widget.type === "dual-number"}
+                                <DualNumber bind:value={config[settingId] as string} labels={widget.labels as [string, string]} min={widget.min} max={widget.max} step={widget.step} />
+                            {:else if widget.type === "custom-color"}
+                                <CustomColor bind:value={config[settingId] as string} presets={widget.presets as SpecialValue[]} widget={widget.widget} default={setting.default as HexColor} />
+                            {:else if widget.type === "custom-number"}
+                                <CustomNumber bind:value={config[settingId] as string} presets={widget.presets as SpecialValue[]} min={widget.min} max={widget.max} step={widget.step} size={widget.size} placeholder={widget.placeholder} integer={widget.integer} widget={widget.widget} />
+                            {:else if widget.type === "scroll-multiplier"}
+                                <ScrollMultiplier bind:value={config[settingId] as string} />
+                            {:else if widget.type === "number-units"}
+                                <NumberWithUnits bind:value={config[settingId] as string} />
+                            {/if}
+                        {:else if setting.type === "switch"}
                             <Switch bind:checked={config[settingId] as boolean} />
                         {:else if setting.type === "text"}
                             <Text bind:value={config[settingId] as string} placeholder={setting.placeholder} size={setting.size} />

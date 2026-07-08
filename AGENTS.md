@@ -83,6 +83,20 @@ These are overwritten on the next CI sync. If the output needs to change, edit t
 
 The ESLint config does not catch all legacy store usage, be deliberate.
 
+## Terminal preview: DOM-based, not `ghostty-web`
+
+The interactive terminal preview (`src/lib/views/InteractiveTerminalDom.svelte`, surfaced through `FloatingTerminal` + `MacDock`) is a **custom DOM renderer**, not a real terminal emulator. This is a deliberate architecture decision — do not "upgrade" it back to `ghostty-web` (Ghostty's WASM-compiled VT parser) or any other real-emulator surface.
+
+**Why.** The whole point of this tool is *live* config preview: change a setting and watch existing on-screen output re-theme in place. The DOM renderer does this for free — every color, font, and metric is a CSS custom property (`--config-bg`, `--config-fg`, `--config-palette-N`, `--config-font-family`, …), so a config change reactively restyles output that's already rendered, including scrollback and command history.
+
+A real emulator like `ghostty-web` keeps its state inside a surface that must be **destroyed and recreated** to apply new config. That wipes scrollback and history on every tweak — you'd have to re-run `ls -la` just to see how a theme change affects it. The workarounds (fully static preview, or record/replay of a canned session) each sacrifice the interactivity that justified having a terminal at all. The fidelity `ghostty-web` buys (glyph shaping, ligatures, GPU compositing) is marginal for a config preview, and a *web* build isn't native-accurate anyway — while the dimensions a config tool actually changes (palette, fg/bg, font, cursor, selection, padding, opacity) all render faithfully in the DOM.
+
+**Consequences for contributors.**
+
+- The fake shell under `src/lib/terminal/` (`filesystem`, `commands`, `completion`, `exec`, `utils`) is a **curated demo surface, not a shell emulator**. Add commands only when they meaningfully showcase config; resist turning it into a general-purpose shell.
+- `ghostty-web` was removed as a dependency along with the old `LivePreview.svelte` / `InteractiveTerminal.svelte` views and the dev-only `/app/live-preview` route. Don't reintroduce them.
+- A genuinely-usable in-browser terminal is a *different product* (a "playground"), not the config preview. If that's ever built, it lives as a separate surface — it does not replace the DOM preview.
+
 ## Other conventions
 
 **Async handlers**: use `withPendingGuard(fn)` from `$lib/utils/debounce` for anything that must not fire concurrently. Use `debounce(fn, ms)` (leading-edge by default in this codebase) for rate-limiting sync actions.

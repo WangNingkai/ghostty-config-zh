@@ -34,7 +34,7 @@
     import CustomNumber from "$lib/components/settings/CustomNumber.svelte";
     import ScrollMultiplier from "$lib/components/settings/ScrollMultiplier.svelte";
     import NumberWithUnits from "$lib/components/settings/NumberWithUnits.svelte";
-    import {type SettingsRegistry} from "$lib/settings/types";
+    import {type SettingsRegistry, type WidgetDef} from "$lib/settings/types";
 
 
     const category = $derived(navigation.find(c => c.id === $page.params.category));
@@ -64,7 +64,9 @@
                     <AppIconPreview />
                     <Separator />
                 {/if}
-                {#each group.settings as settingId, i (settingId)}
+                {#each group.settings as entry, i (i)}
+                    {@const settingId = (typeof entry === "string" ? entry : entry.id) as keyof typeof registry}
+                    {@const widget = (typeof entry === "string" ? undefined : entry.widget) as WidgetDef | undefined}
                     {@const setting = registry[settingId] as SettingsRegistry[keyof SettingsRegistry]}
                     {#if i !== 0}<Separator />{/if}
                     <Item
@@ -81,7 +83,12 @@
                             success(`${setting.name} reset to default`);
                         }}
                     >
-                        {#if setting.type === "switch"}
+                        {#if widget}
+                            <!-- Refactoring: nav-provided widget wins over the registry `type` (strangler-fig). -->
+                            {#if widget.type === "dual-number"}
+                                <DualNumber bind:value={config[settingId] as string} labels={widget.labels as [string, string]} min={widget.min} max={widget.max} step={widget.step} />
+                            {/if}
+                        {:else if setting.type === "switch"}
                             <Switch bind:checked={config[settingId] as boolean} />
                         {:else if setting.type === "text"}
                             <Text bind:value={config[settingId] as string} placeholder={setting.placeholder} size={setting.size} />

@@ -14,13 +14,21 @@ import linux from "$lib/images/tabs/linux.webp";
 import macos from "$lib/images/tabs/macos.webp";
 
 import {registry} from "./registry";
+import type {WidgetDef} from "./types";
 import {dev} from "$app/environment";
+
+// A setting reference in a nav group: either a bare key (widget falls back to the registry
+// `type` while refactoring) or an explicit widget override.
+interface NavSetting {
+    id: keyof typeof registry;
+    widget?: WidgetDef;
+}
 
 interface NavGroup {
     id: string;
     name: string;
     note?: string;
-    settings: Array<keyof typeof registry>;
+    settings: Array<keyof typeof registry | NavSetting>;
 }
 
 interface NavPanel {
@@ -196,8 +204,8 @@ export const navigation = [
                 settings: [
                     "windowTheme",
                     "windowDecoration",
-                    "windowPaddingX",
-                    "windowPaddingY",
+                    {id: "windowPaddingX", widget: {type: "dual-number", labels: ["Left", "Right"], min: 0}},
+                    {id: "windowPaddingY", widget: {type: "dual-number", labels: ["Top", "Bottom"], min: 0}},
                     "windowPaddingBalance",
                     "windowPaddingColor",
                     "windowTitlebarBackground",
@@ -519,7 +527,8 @@ export function validateNavigation() {
     const walk = (panels: NavPanel[]) => {
         for (const panel of panels) {
             for (const group of panel.groups ?? []) {
-                for (const id of group.settings) {
+                for (const entry of group.settings) {
+                    const id = typeof entry === "string" ? entry : entry.id;
                     if (!(id in registry)) throw new Error(`Unknown setting id in nav tree: ${id}`);
                     if (seen.has(id)) throw new Error(`Duplicate setting id in nav tree: ${id}`);
                     seen.add(id);

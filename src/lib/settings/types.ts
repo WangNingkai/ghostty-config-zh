@@ -1,7 +1,8 @@
-import type {HexColor} from "$lib/utils/colors";
-
 export type GhosttyPlatform = "macos" | "linux" | "gtk" | "gtk-wayland" | "gtk-x11";
 
+// A registry entry describes a Ghostty *config key* — nothing about how it renders. Widget
+// selection + widget metadata live on the nav tree's `WidgetDef` (see navigation.ts). The only
+// value-shape distinction that matters at the store level is `repeatable` (string[] vs string).
 export interface SettingInfo {
     key: string; // the actual ghostty config key, e.g. "window-padding-x"
     name: string; // display label
@@ -9,41 +10,19 @@ export interface SettingInfo {
     description: string; // full markdown help text from ghostty schema
     platform?: GhosttyPlatform[];
     since?: string;
-    repeatable?: boolean;
+    repeatable?: true; // present → value is string[]; absent → string. Literal `true` so the
+    // registry's `satisfies` preserves it for the SettingValues mapped type.
     disabled?: boolean;
     deprecated?: boolean | string;
+    default: string | string[]; // the config value at rest (Ghostty is a string format)
 }
 
-interface SwitchSetting extends SettingInfo {
-    type: "switch";
-    default: boolean;
-}
+export type SettingsRegistry = Record<string, SettingInfo>;
 
-interface TextSetting extends SettingInfo {
-    type: "text";
-    default: string;
-    placeholder?: string;
-    size?: number;
-}
+// Maybe move this to keybind module?
+export type KeybindString = `${string}=${string}`;
 
-interface NumberSetting extends SettingInfo {
-    type: "number";
-    default: number | undefined;
-    min?: number;
-    max?: number;
-    step?: number;
-    size?: number;
-    placeholder?: string;
-}
-
-interface RangeSetting extends SettingInfo {
-    type: "range";
-    default: number;
-    min: number;
-    max: number;
-    step?: number;
-    showLabels?: boolean;
-}
+// --- Widget metadata (referenced by WidgetDef params below and by the renderer) ---
 
 export interface DropdownOption {
     name: string;
@@ -53,44 +32,6 @@ export interface DropdownOption {
     group?: string;
     disabled?: boolean;
 }
-
-interface DropdownSetting extends SettingInfo {
-    type: "dropdown";
-    default: string;
-    options: Array<DropdownOption | string>;
-    searchable?: boolean;
-    placeholder?: string;
-    allowEmpty?: boolean;
-    emptyLabel?: string;
-}
-
-interface ColorSetting extends SettingInfo {
-    type: "color";
-    default: HexColor | "";
-}
-
-interface PaletteSetting extends SettingInfo {
-    type: "palette";
-    default: HexColor[];
-}
-
-interface ThemeSetting extends SettingInfo {
-    type: "theme";
-    default: string;
-    options: Array<DropdownOption | string>;
-}
-
-// Maybe move this to keybind module?
-export type KeybindString = `${string}=${string}`;
-
-interface KeybindsSetting extends SettingInfo {
-    type: "keybinds";
-    default: KeybindString[];
-}
-
-// --- Phase A0: new-component widget types (see notes/plans/settings-component-integration.md §1) ---
-// These `type` members are intentionally temporary plumbing for the existing type-based renderer.
-// Phase A migrates widget selection into navigation (WidgetDef) and removes them. Keep minimal.
 
 export type PillVariant = "neutral" | "accent" | "danger";
 
@@ -114,95 +55,6 @@ export interface SpecialValue {
     description?: string;
     variant?: PillVariant;
 }
-
-interface RepeatableTextSetting extends SettingInfo {
-    type: "repeatable-text";
-    default: string[];
-    placeholder?: string;
-    canReorder?: boolean;
-}
-
-interface FeatureListSetting extends SettingInfo {
-    type: "feature-list";
-    default: string;
-    features: FeatureDef[];
-}
-
-interface PillSetting extends SettingInfo {
-    type: "pill";
-    default: string;
-    options: PillOption[];
-}
-
-interface DurationSetting extends SettingInfo {
-    type: "duration";
-    default: string;
-    allowEmpty?: boolean;
-    placeholder?: string;
-}
-
-interface DualNumberSetting extends SettingInfo {
-    type: "dual-number";
-    default: string;
-    labels: [string, string];
-    min?: number;
-    max?: number;
-    step?: number;
-}
-
-interface CustomColorSetting extends SettingInfo {
-    type: "custom-color";
-    default: string;
-    presets: SpecialValue[];
-    widget?: "dropdown" | "pills";
-}
-
-interface CustomNumberSetting extends SettingInfo {
-    type: "custom-number";
-    default: string;
-    presets: SpecialValue[];
-    min?: number;
-    max?: number;
-    step?: number;
-    size?: number;
-    placeholder?: string;
-    integer?: boolean;
-    widget?: "dropdown" | "pills";
-}
-
-interface ScrollMultiplierSetting extends SettingInfo {
-    type: "scroll-multiplier";
-    default: string;
-}
-
-interface NumberUnitsSetting extends SettingInfo {
-    type: "number-units";
-    default: string;
-}
-
-export type SettingDef =
-    | SwitchSetting
-    | TextSetting
-    | NumberSetting
-    | RangeSetting
-    | DropdownSetting
-    | ColorSetting
-    | PaletteSetting
-    | ThemeSetting
-    | KeybindsSetting
-    | RepeatableTextSetting
-    | FeatureListSetting
-    | PillSetting
-    | DurationSetting
-    | DualNumberSetting
-    | CustomColorSetting
-    | CustomNumberSetting
-    | ScrollMultiplierSetting
-    | NumberUnitsSetting;
-
-export type TypeToValue<T extends SettingDef["type"]> = Extract<SettingDef, {type: T;}>["default"];
-
-export type SettingsRegistry = Record<string, SettingDef>;
 
 // Keys for the group preview components. The union lives here (data-only) so navigation can
 // reference it while the renderer-side previews map implements `Record<PreviewKey, Component>` —

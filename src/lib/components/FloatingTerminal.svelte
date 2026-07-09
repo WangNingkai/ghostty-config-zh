@@ -301,6 +301,10 @@
             <div class="titlebar-end"></div>
         </div>
         <div class="terminal-body">
+            <!-- Each comparison hard-codes what ""/unset means for that setting: the
+                 selection-clear-* keys have concrete boolean defaults, while copy-on-select and
+                 cursor-style-blink are *enabled* when unset — so boolCodec ("" -> false) can't
+                 be used uniformly here. -->
             <InteractiveTerminalDom
                 {onCwdChange}
                 selectionClearOnCopy={config.selectionClearOnCopy === "true"}

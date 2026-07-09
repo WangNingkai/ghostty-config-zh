@@ -32,7 +32,7 @@
     import CustomNumber from "$lib/components/settings/CustomNumber.svelte";
     import ScrollMultiplier from "$lib/components/settings/ScrollMultiplier.svelte";
     import NumberWithUnits from "$lib/components/settings/NumberWithUnits.svelte";
-    import {type DropdownOption, type FeatureDef, type PillOption, type SettingsRegistry, type SpecialValue, type WidgetDef} from "$lib/settings/types";
+    import {type DropdownOption, type FeatureDef, type PillOption, type SettingsRegistry, type SpecialValue} from "$lib/settings/types";
 
 
     const category = $derived(navigation.find(c => c.id === $page.params.category));
@@ -55,10 +55,9 @@
                     <Preview />
                     <Separator />
                 {/if}
-                {#each group.settings as entry, i (i)}
-                    {@const settingId = (typeof entry === "string" ? entry : entry.id) as keyof typeof registry}
-                    {@const widget = (typeof entry === "string" ? undefined : entry.widget) as WidgetDef | undefined}
+                {#each group.settings as settingId, i (i)}
                     {@const setting = registry[settingId] as SettingsRegistry[keyof SettingsRegistry]}
+                    {@const widget = setting.widget}
                     {#if i !== 0}<Separator />{/if}
                     <Item
                         {settingId}

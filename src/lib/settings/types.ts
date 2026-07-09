@@ -1,21 +1,33 @@
 export type GhosttyPlatform = "macos" | "linux" | "gtk" | "gtk-wayland" | "gtk-x11";
 
-// A registry entry describes a Ghostty *config key* — nothing about how it renders. Widget
-// selection + widget metadata live on the nav tree's `WidgetDef` (see navigation.ts). The only
-// value-shape distinction that matters at the store level is `repeatable` (string[] vs string).
-export interface SettingInfo {
+// A registry entry describes a Ghostty *config key* plus the (data-only) widget that renders
+// it. The union is discriminated on `repeatable` aka the one value-shape distinction that matters
+// at the store level — so `satisfies SettingsRegistry` enforces per entry, at compile time,
+// that the `default` shape and the widget kind both agree with the value shape.
+interface SettingInfoBase {
     key: string; // the actual ghostty config key, e.g. "window-padding-x"
     name: string; // display label
     note?: string; // short curated HTML hint
     description: string; // full markdown help text from ghostty schema
     platform?: GhosttyPlatform[];
     since?: string;
-    repeatable?: true; // present → value is string[]; absent → string. Literal `true` so the
-    // registry's `satisfies` preserves it for the SettingValues mapped type.
     disabled?: boolean;
     deprecated?: boolean | string;
-    default: string | string[]; // the config value at rest (Ghostty is a string format)
 }
+
+export interface ScalarSettingInfo extends SettingInfoBase {
+    repeatable?: never;
+    default: string; // the config value at rest (Ghostty is a string format)
+    widget?: ScalarWidgetDef; // omitted → renders as a plain Text input
+}
+
+export interface RepeatableSettingInfo extends SettingInfoBase {
+    repeatable: true; // literal `true` so `satisfies` preserves it for the SettingValues mapped type
+    default: string[];
+    widget?: RepeatableWidgetDef; // omitted → renders as RepeatableText
+}
+
+export type SettingInfo = ScalarSettingInfo | RepeatableSettingInfo;
 
 export type SettingsRegistry = Record<string, SettingInfo>;
 
@@ -61,11 +73,12 @@ export interface SpecialValue {
 // nav keys are checked valid and the map is checked exhaustive, both against this one list.
 export type PreviewKey = "baseColor" | "cursor" | "palette" | "appIcon";
 
-// WidgetDef: widget selection + metadata, living in navigation.
+// WidgetDef: widget selection + metadata, living on registry entries.
 // It is data-only, a string discriminant plus plain params,
-// so navigation.ts stays free of `.svelte` imports and validateNavigation()/Bun tests stay clean.
-// Array/tuple fields are `readonly` so nav's `as const satisfies` literals assign cleanly; the
-// renderer casts to the mutable shapes its components expect at the (few) call sites that pass them.
+// so registry.ts stays free of `.svelte` imports and validateRegistry()/Bun tests stay clean.
+// Array/tuple fields are `readonly`; literals in the registry contextually type against them,
+// and the renderer casts to the mutable shapes its components expect at the (few) call sites
+// that pass them.
 export type WidgetDef =
     | {type: "switch";}
     | {type: "text"; placeholder?: string; size?: number;}
@@ -75,7 +88,6 @@ export type WidgetDef =
     | {type: "color";}
     | {type: "palette";}
     | {type: "theme"; options: ReadonlyArray<DropdownOption | string>;}
-    | {type: "keybinds";}
     | {type: "repeatable-text"; placeholder?: string; canReorder?: boolean;}
     | {type: "feature-list"; features: readonly FeatureDef[];}
     | {type: "pill"; options: readonly PillOption[];}
@@ -85,3 +97,8 @@ export type WidgetDef =
     | {type: "custom-number"; presets: readonly SpecialValue[]; min?: number; max?: number; step?: number; size?: number; placeholder?: string; integer?: boolean; widget?: "dropdown" | "pills";}
     | {type: "scroll-multiplier";}
     | {type: "number-units";};
+
+// The widget kinds whose bound value is string[] rather than string. Splitting WidgetDef on
+// this is what lets the SettingInfo union check widget/value-shape agreement via `satisfies`.
+export type RepeatableWidgetDef = Extract<WidgetDef, {type: "repeatable-text" | "palette";}>;
+export type ScalarWidgetDef = Exclude<WidgetDef, RepeatableWidgetDef>;

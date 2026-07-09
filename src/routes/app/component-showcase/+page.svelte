@@ -171,7 +171,7 @@
         </Item>
         <Separator />
         <Item name="Number with undefined" note="Supports undefined value for 'no value' state.">
-            <Number bind:value={values.numberWithUndefined} min={0} max={100} step={1} placeholder="No value" />
+            <Number bind:value={values.numberWithUndefined} min={0} max={100} step={1} placeholder="No value" nullable />
         </Item>
         <Separator />
         <Item name="Number with units" note="Supports numbers with units.">

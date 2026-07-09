@@ -81,7 +81,9 @@
                             {:else if widget.type === "range"}
                                 <Range bind:value={config[settingId] as string} min={widget.min} max={widget.max} step={widget.step} showLabels={widget.showLabels} />
                             {:else if widget.type === "number"}
-                                <Number bind:value={config[settingId] as string} min={widget.min} max={widget.max} step={widget.step} size={widget.size} placeholder={widget.placeholder} integer={widget.integer} />
+                                <!-- Per the AGENTS.md defaults convention, `default: ""` means the setting is
+                                     genuinely unset by default — exactly the ones a user may clear back to unset. -->
+                                <Number bind:value={config[settingId] as string} min={widget.min} max={widget.max} step={widget.step} size={widget.size} placeholder={widget.placeholder} integer={widget.integer} nullable={setting.default === ""} />
                             {:else if widget.type === "dropdown"}
                                 <Dropdown bind:value={config[settingId] as string} options={widget.options as Array<DropdownOption | string>} placeholder={widget.placeholder} allowEmpty={widget.allowEmpty} emptyLabel={widget.emptyLabel} disabled={setting.disabled} />
                             {:else if widget.type === "theme"}

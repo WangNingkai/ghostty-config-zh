@@ -82,6 +82,10 @@ Live config state as a Svelte 5 `$state` object. Key exports:
 
 These are overwritten on the next CI sync. If the output needs to change, edit the generator script, not the generated file.
 
+## `notes/` is local-only
+
+The `notes/` directory (plans, scratch, handoff docs) is **gitignored and never ships**. Do not reference `notes/...` paths or note filenames from anything committed — source comments, tests, README, PR descriptions, or this file. If something in a note genuinely needs to be public, surface the content itself where it belongs (a convention section in this file, a comment at the relevant code site, or a proper committed doc) instead of linking into `notes/`.
+
 ## Svelte 5: patterns in use
 
 | Purpose | Use | Do not use |
@@ -120,8 +124,10 @@ A real emulator like `ghostty-web` keeps its state inside a surface that must be
 **Defaults**: a registry `default` is a **string** (or `string[]`) and must equal Ghostty's actual default *state*, since `diff()` / `isNonDefault()` compare against it as strings. Where that default lives depends on the value encoding:
 
 - **Scalar settings** (rendered by `text`/`number`/`dropdown`/`pill`/`duration`/`color`/`dual-number`/… widgets) — the default lives only in `default`, string-encoded (`"13"`, `"false"`, `"native"`). Use `""` only when Ghostty's genuine default is unset/empty.
-- **Override-encoded settings** (`feature-list`; also `palette` / `keybind`) — the stored value is already *relative* to per-item sub-defaults, so the setting `default` is `""`/`[]` (no overrides) and the real per-item defaults live in the **widget metadata on `navigation.ts`** (e.g. a `feature-list` widget's `features[].default`), not the registry. This is why `""` is correct there despite the items having defaults.
-- **Durations** specifically: a concrete default → set the string (`"5s"`) and pair the nav `duration` widget with `allowEmpty: false`; a genuinely-unset default → `""` + `allowEmpty: true`. Note `allowEmpty` is a nav-side `WidgetDef` param now, not a registry field.
+- **Override-encoded settings** (`feature-list`; also `palette` / `keybind`) — the stored value is already *relative* to per-item sub-defaults, so the setting `default` is `""`/`[]` (no overrides) and the real per-item defaults live in the **widget metadata on the entry's `widget`** (e.g. a `feature-list` widget's `features[].default`), not in `default` itself. This is why `""` is correct there despite the items having defaults.
+- **Durations** specifically: a concrete default → set the string (`"5s"`) and give the entry's `duration` widget `allowEmpty: false`; a genuinely-unset default → `""` + `allowEmpty: true`. `validateRegistry()` enforces this pairing (`allowEmpty` ⟺ `""` default).
+
+The `""`-means-genuinely-unset rule is **load-bearing**, not just style: the settings renderer derives a `number` widget's clearability from it (`nullable={setting.default === ""}`), so a wrong `""` default makes a required setting blankable and a wrong concrete default makes an optional setting un-clearable.
 
 **Setting keys**: Ghostty config keys are `kebab-case` (e.g. `font-size`). Registry keys are `camelCase` (e.g. `fontSize`). The `key` field on each registry entry is the Ghostty string; the JS property name is the camelCase identifier. These must remain in sync with Ghostty's actual config schema.
 

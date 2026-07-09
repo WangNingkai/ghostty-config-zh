@@ -19,7 +19,9 @@
     const cursorColor = $derived(resolveCellColor(config.cursorColor, config.foreground, config.background) || config.foreground);
     const cursorText = $derived(isCursorVisible ? resolveCellColor(config.cursorText, config.foreground, config.background) || config.background : config.foreground);
     // Unset/unparseable opacity falls back to Ghostty's default of 1; a genuine "0" must stay 0.
-    const cursorOpacity = $derived(isCursorVisible ? Math.round((numberCodec.parse(config.cursorOpacity) ?? 1) * 255).toString(16) : "00");
+    // padStart keeps the alpha byte two hex digits (e.g. 0.02 → "05" not "5") so the
+    // concatenated #rrggbbaa color stays parseable.
+    const cursorOpacity = $derived(isCursorVisible ? Math.round((numberCodec.parse(config.cursorOpacity) ?? 1) * 255).toString(16).padStart(2, "0") : "00");
 </script>
 
 <div class="preview">

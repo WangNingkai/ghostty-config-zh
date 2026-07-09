@@ -3,8 +3,9 @@ import config, {defaults, diff, diffFromDefaults, isNonDefault, load, resetSetti
 import {serialize} from "$lib/utils/parse";
 
 // These lock in the flat-string store contract: every value is a string | string[], and
-// diff()/load() compare/merge them as such (see the Phase A+B flatten). There was no coverage
-// guarding this serialization source of truth before, so this doubles as regression protection.
+// diff()/load() compare/merge them as such (see the store-flatten note in AGENTS.md). There was
+// no coverage guarding this serialization source of truth before, so this doubles as regression
+// protection.
 
 afterEach(() => {
     // config is a module singleton; reset anything a test touched

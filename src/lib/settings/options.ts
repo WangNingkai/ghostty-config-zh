@@ -6,7 +6,7 @@ import type {DropdownOption} from "./types";
 
 // Option lists derived entirely from build-time data (generated themes/macicons modules).
 // They're computed once at module scope and referenced directly by widget defs in
-// navigation.ts — no runtime population step, so the nav tree is complete at import time.
+// registry.ts — no runtime population step, so the registry is complete at import time.
 // Options that genuinely require runtime data (OS detection, shelling out) belong in
 // initializers.ts instead.
 

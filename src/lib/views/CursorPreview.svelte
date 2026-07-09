@@ -1,4 +1,5 @@
 <script lang="ts">
+    import {numberCodec} from "$lib/settings/codecs";
     import config from "$lib/stores/config.svelte";
     import {resolveCellColor} from "$lib/utils/colors";
     import {onMount} from "svelte";
@@ -17,7 +18,10 @@
     // cursorColor/cursorText may be `cell-foreground`/`cell-background` keywords; resolve them.
     const cursorColor = $derived(resolveCellColor(config.cursorColor, config.foreground, config.background) || config.foreground);
     const cursorText = $derived(isCursorVisible ? resolveCellColor(config.cursorText, config.foreground, config.background) || config.background : config.foreground);
-    const cursorOpacity = $derived(isCursorVisible ? Math.round(config.cursorOpacity * 255).toString(16) : "00");
+    // Unset/unparseable opacity falls back to Ghostty's default of 1; a genuine "0" must stay 0.
+    // padStart keeps the alpha byte two hex digits (e.g. 0.02 → "05" not "5") so the
+    // concatenated #rrggbbaa color stays parseable.
+    const cursorOpacity = $derived(isCursorVisible ? Math.round((numberCodec.parse(config.cursorOpacity) ?? 1) * 255).toString(16).padStart(2, "0") : "00");
 </script>
 
 <div class="preview">

@@ -1,11 +1,12 @@
-import {registry, type SettingsSchema} from "./registry";
+import {registry} from "./registry";
 
+type Registry = typeof registry;
 
-type AsyncInitializer = (registry: SettingsSchema) => Promise<void>;
+type AsyncInitializer = (registry: Registry) => Promise<void>;
 
 const asyncInitializers: AsyncInitializer[] = [
     // Font list... web: skip or no-op; desktop: shell out to `ghostty +list-fonts`
-    async (_: SettingsSchema) => {
+    async (_: Registry) => {
         // The following TODO was written by a clanker.
         // TODO: implement this, ideally by shelling out to `ghostty +list-fonts`
         // and parsing the output, which would ensure the list is accurate and
@@ -31,16 +32,16 @@ const getOS = () => {
     return "other";
 };
 
-type Initializer = (registry: SettingsSchema) => void;
+type Initializer = (registry: Registry) => void;
 
 const syncInitializers: Initializer[] = [
-    (_: SettingsSchema) => {
+    (_: Registry) => {
         // Leaving this here as an example for the future
         // Apparently Ghostty now sets this to "true" for both mac and linux
         // reg.copyOnSelect.default = getOS() === "linux" ? "true" : "false";
     },
 
-    (reg: SettingsSchema) => reg.quitAfterLastWindowClosed.default = getOS() !== "macos",
+    (reg: Registry) => reg.quitAfterLastWindowClosed.default = String(getOS() !== "macos"),
 ];
 
 export function runSyncInitializers() {

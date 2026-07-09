@@ -32,7 +32,7 @@
     import CustomNumber from "$lib/components/settings/CustomNumber.svelte";
     import ScrollMultiplier from "$lib/components/settings/ScrollMultiplier.svelte";
     import NumberWithUnits from "$lib/components/settings/NumberWithUnits.svelte";
-    import {type DropdownOption, type FeatureDef, type PillOption, type SettingsRegistry, type SpecialValue, type WidgetDef} from "$lib/settings/types";
+    import {type DropdownOption, type FeatureDef, type PillOption, type SettingsRegistry, type SpecialValue} from "$lib/settings/types";
 
 
     const category = $derived(navigation.find(c => c.id === $page.params.category));
@@ -55,10 +55,9 @@
                     <Preview />
                     <Separator />
                 {/if}
-                {#each group.settings as entry, i (i)}
-                    {@const settingId = (typeof entry === "string" ? entry : entry.id) as keyof typeof registry}
-                    {@const widget = (typeof entry === "string" ? undefined : entry.widget) as WidgetDef | undefined}
+                {#each group.settings as settingId, i (i)}
                     {@const setting = registry[settingId] as SettingsRegistry[keyof SettingsRegistry]}
+                    {@const widget = setting.widget}
                     {#if i !== 0}<Separator />{/if}
                     <Item
                         {settingId}
@@ -67,7 +66,7 @@
                         // filter out the current platform from the badge list since it's already obvious from the UI
                         platform={setting?.platform?.filter(p => p !== title?.toLowerCase())}
                         since={setting.since}
-                        description={setting.type !== "palette" ? setting.description : undefined}
+                        description={widget?.type === "palette" ? undefined : setting.description}
                         isNonDefault={isNonDefault(settingId)}
                         onReset={() => {
                             resetSetting(settingId);
@@ -75,15 +74,16 @@
                         }}
                     >
                         {#if widget}
-                            <!-- Refactoring: nav-provided widget wins over the registry `type` (strangler-fig). -->
                             {#if widget.type === "switch"}
-                                <Switch bind:checked={config[settingId] as boolean} />
+                                <Switch bind:value={config[settingId] as string} />
                             {:else if widget.type === "text"}
                                 <Text bind:value={config[settingId] as string} placeholder={widget.placeholder} size={widget.size} />
                             {:else if widget.type === "range"}
-                                <Range bind:value={config[settingId] as number} min={widget.min} max={widget.max} step={widget.step} showLabels={widget.showLabels} />
+                                <Range bind:value={config[settingId] as string} min={widget.min} max={widget.max} step={widget.step} showLabels={widget.showLabels} />
                             {:else if widget.type === "number"}
-                                <Number bind:value={config[settingId] as number} min={widget.min} max={widget.max} step={widget.step} size={widget.size} placeholder={widget.placeholder} integer={widget.integer} />
+                                <!-- Per the AGENTS.md defaults convention, `default: ""` means the setting is
+                                     genuinely unset by default — exactly the ones a user may clear back to unset. -->
+                                <Number bind:value={config[settingId] as string} min={widget.min} max={widget.max} step={widget.step} size={widget.size} placeholder={widget.placeholder} integer={widget.integer} nullable={setting.default === ""} />
                             {:else if widget.type === "dropdown"}
                                 <Dropdown bind:value={config[settingId] as string} options={widget.options as Array<DropdownOption | string>} placeholder={widget.placeholder} allowEmpty={widget.allowEmpty} emptyLabel={widget.emptyLabel} disabled={setting.disabled} />
                             {:else if widget.type === "theme"}
@@ -111,40 +111,12 @@
                             {:else if widget.type === "number-units"}
                                 <NumberWithUnits bind:value={config[settingId] as string} />
                             {/if}
-                        {:else if setting.type === "switch"}
-                            <Switch bind:checked={config[settingId] as boolean} />
-                        {:else if setting.type === "text"}
-                            <Text bind:value={config[settingId] as string} placeholder={setting.placeholder} size={setting.size} />
-                        {:else if setting.type === "range"}
-                            <Range bind:value={config[settingId] as number} min={setting.min} max={setting.max} step={setting.step} showLabels={setting.showLabels} />
-                        {:else if setting.type === "number"}
-                            <Number bind:value={config[settingId] as number} min={setting.min} max={setting.max} step={setting.step} size={setting.size} placeholder={setting.placeholder} />
-                        {:else if setting.type === "dropdown"}
-                            <Dropdown bind:value={config[settingId] as string} options={setting.options} placeholder={setting.placeholder} allowEmpty={setting.allowEmpty} emptyLabel={setting.emptyLabel} disabled={setting.disabled} />
-                        {:else if setting.type === "theme"}
-                            <Theme bind:value={config[settingId] as string} options={setting.options} />
-                        {:else if setting.type === "color"}
-                            <Color defaultValue={setting.default as HexColor} bind:value={config[settingId] as HexColor} />
-                        {:else if setting.type === "palette"}
-                            <Palette defaultValue={setting.default} bind:value={config[settingId] as HexColor[]} />
-                        {:else if setting.type === "repeatable-text"}
-                            <RepeatableText bind:value={config[settingId] as string[]} placeholder={setting.placeholder} canReorder={setting.canReorder} />
-                        {:else if setting.type === "feature-list"}
-                            <FeatureList bind:value={config[settingId] as string} features={setting.features} />
-                        {:else if setting.type === "pill"}
-                            <PillButtons bind:value={config[settingId] as string} options={setting.options} />
-                        {:else if setting.type === "duration"}
-                            <Duration bind:value={config[settingId] as string} nullable={setting.allowEmpty} placeholder={setting.placeholder} />
-                        {:else if setting.type === "dual-number"}
-                            <DualNumber bind:value={config[settingId] as string} labels={setting.labels} min={setting.min} max={setting.max} step={setting.step} />
-                        {:else if setting.type === "custom-color"}
-                            <CustomColor bind:value={config[settingId] as string} presets={setting.presets} widget={setting.widget} default={setting.default as HexColor} />
-                        {:else if setting.type === "custom-number"}
-                            <CustomNumber bind:value={config[settingId] as string} presets={setting.presets} min={setting.min} max={setting.max} step={setting.step} size={setting.size} placeholder={setting.placeholder} integer={setting.integer} widget={setting.widget} />
-                        {:else if setting.type === "scroll-multiplier"}
-                            <ScrollMultiplier bind:value={config[settingId] as string} />
-                        {:else if setting.type === "number-units"}
-                            <NumberWithUnits bind:value={config[settingId] as string} />
+                        <!-- Bare nav entries carry no widget: default to RepeatableText when the setting is
+                             string[]-valued (`repeatable`), otherwise a plain Text input. -->
+                        {:else if setting.repeatable}
+                            <RepeatableText bind:value={config[settingId] as string[]} />
+                        {:else}
+                            <Text bind:value={config[settingId] as string} />
                         {/if}
                     </Item>
                 {/each}

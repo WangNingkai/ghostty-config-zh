@@ -39,22 +39,22 @@
         dropdownBasic: string;
         dropdownRich: string;
         booleanCheckbox: boolean;
-        booleanSwitch: boolean;
+        booleanSwitch: string;
         colorBasic: HexColor;
         colorPalette: HexColor[];
         colorCustom: string;
         colorCustomAdvanced: string;
-        numberBasic: number;
-        numberWithUndefined: number | undefined;
-        numberFractional: number;
+        numberBasic: string;
+        numberWithUndefined: string;
+        numberFractional: string;
         numberWithUnits: string;
         numberDual: string;
         numberDualLinked: string;
         numberCustom: string;
         numberCustomAdvanced: string;
         numberMultiplier: string;
-        rangeBasic: number;
-        rangeLabeled: number;
+        rangeBasic: string;
+        rangeLabeled: string;
         textBasic: string;
         textRepeatable: string[];
         textDuration: string;
@@ -70,22 +70,22 @@
         dropdownBasic: "detect",
         dropdownRich: "nord",
         booleanCheckbox: true,
-        booleanSwitch: false,
+        booleanSwitch: "false",
         colorBasic: "#4f5a6f",
         colorPalette: ["#4f5a6f", "#f6f7fb", "#c0d0e0", "#a0b0c0", "#708090"],
         colorCustom: "transparent",
         colorCustomAdvanced: "#68A6C5",
-        numberBasic: 42,
-        numberWithUndefined: undefined,
-        numberFractional: 1.4,
+        numberBasic: "42",
+        numberWithUndefined: "",
+        numberFractional: "1.4",
         numberWithUnits: "10px",
         numberDual: "80,60",
         numberDualLinked: "50",
         numberCustom: "macos-glass-regular",
         numberCustomAdvanced: "0.5",
         numberMultiplier: "precision:1,discrete:3",
-        rangeBasic: 42,
-        rangeLabeled: 0.4,
+        rangeBasic: "42",
+        rangeLabeled: "0.4",
         textBasic: "Hello, world!",
         textRepeatable: ["Item 1", "Item 2", "Item 3"],
         textDuration: "1h30m",
@@ -108,7 +108,7 @@
         </Item>
         <Separator />
         <Item name="Switch" note="This is a switch.">
-            <Switch bind:checked={values.booleanSwitch} />
+            <Switch bind:value={values.booleanSwitch} />
         </Item>
     </Group>
 
@@ -171,7 +171,7 @@
         </Item>
         <Separator />
         <Item name="Number with undefined" note="Supports undefined value for 'no value' state.">
-            <Number bind:value={values.numberWithUndefined} min={0} max={100} step={1} placeholder="No value" />
+            <Number bind:value={values.numberWithUndefined} min={0} max={100} step={1} placeholder="No value" nullable />
         </Item>
         <Separator />
         <Item name="Number with units" note="Supports numbers with units.">

@@ -112,8 +112,7 @@ const searchableSettings = (() => {
     for (const category of navigation) {
         if (!category.groups) continue;
         for (const group of category.groups) {
-            for (const entry of group.settings) {
-                const id = typeof entry === "string" ? entry : entry.id;
+            for (const id of group.settings) {
                 const setting = registry[id] as SettingsRegistry[keyof SettingsRegistry];
                 const cleanedNote = setting.note ? stripHtmlRegex(setting.note) : "";
                 const cleanedDescription = setting.description ? stripMarkdownRegex(setting.description) : "";

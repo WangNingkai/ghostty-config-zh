@@ -7,9 +7,10 @@
     import Range from "$lib/components/settings/Range.svelte";
 
     let fontFamily = $state("JetBrainsMono Nerd Font");
-    let fontSize = $state(13);
-    let bold = $state(false);
-    let italic = $state(false);
+    // Range/Switch bind flat-store strings; keep this local preview state in the same shape.
+    let fontSize = $state("13");
+    let bold = $state("false");
+    let italic = $state("false");
 
     /* eslint-disable svelte/prefer-style-directive */
     // TODO: fix above with preview component
@@ -18,7 +19,7 @@
 
 <!-- eslint-disable-next-line svelte/no-useless-mustaches -->
 <Group title="" note={"Use this page to test your locally installed fonts as they may look in the terminal along with colors and glyphs.\n\nNote: this playground does not set any actual settings."}>
-    <div class="preview" style="font-family: {fontFamily}; font-size: {fontSize + "px"}; font-style: {italic ? "italic" : "normal"}; font-weight: {bold ? 700 : 400};">
+    <div class="preview" style="font-family: {fontFamily}; font-size: {fontSize}px; font-style: {italic === "true" ? "italic" : "normal"}; font-weight: {bold === "true" ? 700 : 400};">
     <div class="row prompt">
         <span style="color: var(--config-palette-2);">john</span>
         <span style="color: var(--config-palette-6);">@</span>
@@ -40,9 +41,9 @@
     <Separator />
     <Item name="Font size"><Range bind:value={fontSize} min={4} max={60} step={0.5} /></Item>
     <Separator />
-    <Item name="Bold"><Switch bind:checked={bold} /></Item>
+    <Item name="Bold"><Switch bind:value={bold} /></Item>
     <Separator />
-    <Item name="Italic"><Switch bind:checked={italic} /></Item>
+    <Item name="Italic"><Switch bind:value={italic} /></Item>
     <!-- Add ligature options -->
 </Group>
 

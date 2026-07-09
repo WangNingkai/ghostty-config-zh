@@ -1,21 +1,5 @@
 <script lang="ts">
-    interface DurationUnit {
-        suffix: string;
-        label: string;
-        plural: string;
-        ms: number;
-    }
-
-    interface ParsedSegment {
-        value: number;
-        unit: DurationUnit;
-    }
-
-    interface ParseResult {
-        ok: boolean;
-        segments: ParsedSegment[];
-        error?: string;
-    }
+    import {humanizeDuration, parseDuration} from "$lib/settings/codecs";
 
     interface Props {
         value: string;
@@ -27,102 +11,19 @@
     // eslint-disable-next-line prefer-const
     let {value = $bindable(""), nullable = false, placeholder = "", disabled = false}: Props = $props();
 
-    // TODO: move somewhere else?
-    const UNITS: DurationUnit[] = [
-        {suffix: "ns", label: "Nanosecond", plural: "Nanoseconds", ms: 0.000001},
-        {suffix: "us", label: "Microsecond", plural: "Microseconds", ms: 0.001},
-        {suffix: "ms", label: "Millisecond", plural: "Milliseconds", ms: 1},
-        {suffix: "s", label: "Second", plural: "Seconds", ms: 1000},
-        {suffix: "m", label: "Minute", plural: "Minutes", ms: 60_000},
-        {suffix: "h", label: "Hour", plural: "Hours", ms: 3_600_000},
-        {suffix: "d", label: "Day", plural: "Days", ms: 86_400_000},
-        {suffix: "y", label: "Year", plural: "Years", ms: 31_536_000_000},
-    ];
-
-    // Longest suffix first so 'ms' matches before 's', 'us' before 's', etc.
-    const UNITS_BY_SUFFIX_DESC = [...UNITS].sort((a, b) => b.suffix.length - a.suffix.length);
-
-    function parse(raw: string): ParseResult {
-        const trimmed = raw.trim();
-        if (trimmed === "") {
-            return nullable
-                ? {ok: true, segments: []}
-                : {ok: false, segments: [], error: "Value is required"};
-        }
-
-        const segments: ParsedSegment[] = [];
-        let remaining = trimmed;
-        // This doesn't need to be reactive currently
-        // eslint-disable-next-line svelte/prefer-svelte-reactivity
-        const seenUnits = new Set<string>();
-
-        while (remaining.length > 0) {
-            // Skip whitespace between segments
-            remaining = remaining.trim();
-            if (remaining.length === 0) break;
-
-            // Must start with a positive integer
-            const numMatch = remaining.match(/^(\d+)/);
-            if (!numMatch) {
-                return {
-                    ok: false,
-                    segments,
-                    error: `Expected a number, got "${remaining}"`
-                };
-            }
-
-            const num = parseInt(numMatch[1], 10);
-            remaining = remaining.slice(numMatch[1].length);
-
-            // Find the unit suffix
-            const unit = UNITS_BY_SUFFIX_DESC.find(u => remaining.startsWith(u.suffix));
-            if (!unit) {
-                return {
-                    ok: false,
-                    segments,
-                    error: remaining.length
-                        ? `Unknown unit "${remaining}"`
-                        : "Missing unit after number"
-                };
-            }
-
-            if (seenUnits.has(unit.suffix)) {
-                return {ok: false, segments, error: `Duplicate unit "${unit.suffix}"`};
-            }
-
-            seenUnits.add(unit.suffix);
-            segments.push({value: num, unit});
-            remaining = remaining.slice(unit.suffix.length);
-        }
-
-        if (segments.length === 0) {
-            return {ok: false, segments, error: "Enter a duration"};
-        }
-
-        return {ok: true, segments};
-    }
-
-    function humanize(segments: ParsedSegment[]): string {
-        if (segments.length === 0) return "";
-        return segments
-            .map(s => `${s.value} ${s.value === 1 ? s.unit.label : s.unit.plural}`)
-            .join(", ");
-    }
-
-
     // Internal input state tracks the bound `value` via a writable $derived: local edits override
     // it while typing, but it reverts to `value` whenever that changes from the outside
     // (reset-to-default, config import). We only push back to `value` once the input parses, so a
     // live preview/error can be shown for an invalid draft without mutating the bound value.
     let internalValue = $derived(value);
-    const result = $derived(parse(internalValue));
-    const preview = $derived(humanize(result.segments));
+    const result = $derived(parseDuration(internalValue, nullable));
+    const preview = $derived(humanizeDuration(result.segments));
     const showError = $derived(!result.ok && internalValue !== "");
     const showPreview = $derived(result.ok && preview !== "");
 
 
     function onchange(next: string) {
-        const nextResult = parse(next);
+        const nextResult = parseDuration(next, nullable);
         if (nextResult.ok) value = next;
         internalValue = next;
     }

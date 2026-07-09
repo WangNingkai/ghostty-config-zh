@@ -13,7 +13,7 @@ Operating guide for automated agents working in this repository. Read this befor
 ```bash
 bun run check   # svelte-kit sync + svelte-check (type errors)
 bun run lint    # ESLint strict flat config
-bun run test    # unit tests via Bun
+bun run test    # unit tests via Vitest (bun is just the script runner)
 ```
 
 All three must pass cleanly. Do not open or mark a PR ready if any fail.

@@ -75,7 +75,7 @@ export type PreviewKey = "baseColor" | "cursor" | "palette" | "appIcon";
 
 // WidgetDef: widget selection + metadata, living on registry entries.
 // It is data-only, a string discriminant plus plain params,
-// so registry.ts stays free of `.svelte` imports and validateRegistry()/Bun tests stay clean.
+// so registry.ts stays free of `.svelte` imports and validateRegistry()/the Vitest suite stay clean.
 // Array/tuple fields are `readonly`; literals in the registry contextually type against them,
 // and the renderer casts to the mutable shapes its components expect at the (few) call sites
 // that pass them.

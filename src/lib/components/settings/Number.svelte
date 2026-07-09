@@ -10,19 +10,18 @@
         size?: number;
         placeholder?: string;
         integer?: boolean;
+        nullable?: boolean; // empty input commits "" (= unset); otherwise it reverts on blur
         onchange?: (value: number | undefined) => void;
         disabled?: boolean;
     };
 
     // why is eslint like this smh
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(""), min, max, step = 1, size, placeholder, integer = true, onchange, disabled}: Props = $props();
+    let {value = $bindable(""), min, max, step = 1, size, placeholder, integer = true, nullable = false, onchange, disabled}: Props = $props();
 
     // The bound `value` is a string; all the numeric math below works off this parsed number
     // (undefined means "no value" / empty input).
     const num = $derived(numberCodec.parse(value));
-
-    const wasInitiallyUndefined = numberCodec.parse(value) === undefined;
 
     // Check if the current value is valid (within min/max bounds)
     // undefined and NaN are considered valid (they just mean "no value")
@@ -98,9 +97,10 @@
         const target = event.target as HTMLInputElement;
         const inputText = target.value;
 
-        // Allow empty input - set to undefined
+        // Empty input clears the value only when the setting is genuinely unsettable;
+        // otherwise leave the stored value alone and let onBlur restore the display.
         if (inputText === "") {
-            if (wasInitiallyUndefined) commit(undefined);
+            if (nullable) commit(undefined);
             return;
         }
 

@@ -30,7 +30,7 @@
         <Number
             value={customNumber}
             onchange={(n: number | undefined) => setCustom(n === undefined ? "" : n.toString())}
-            {min} {max} {step} {size} {placeholder} {integer} {disabled}
+            {min} {max} {step} {size} {placeholder} {integer} {disabled} nullable
         />
     {/snippet}
     <!-- eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return -->

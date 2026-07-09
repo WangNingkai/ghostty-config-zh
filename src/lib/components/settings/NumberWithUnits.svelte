@@ -50,6 +50,7 @@
         max={bounds.max}
         step={1}
         integer
+        nullable
         placeholder="unset"
         onchange={onNumberChange}
     />

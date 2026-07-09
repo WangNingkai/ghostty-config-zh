@@ -17,7 +17,7 @@
     // cursorColor/cursorText may be `cell-foreground`/`cell-background` keywords; resolve them.
     const cursorColor = $derived(resolveCellColor(config.cursorColor, config.foreground, config.background) || config.foreground);
     const cursorText = $derived(isCursorVisible ? resolveCellColor(config.cursorText, config.foreground, config.background) || config.background : config.foreground);
-    const cursorOpacity = $derived(isCursorVisible ? Math.round(config.cursorOpacity * 255).toString(16) : "00");
+    const cursorOpacity = $derived(isCursorVisible ? Math.round((Number(config.cursorOpacity) || 0) * 255).toString(16) : "00");
 </script>
 
 <div class="preview">

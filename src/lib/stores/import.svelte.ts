@@ -50,7 +50,7 @@ function clearHash() {
 function buildPreview(source: ImportSource, text: string): PreviewState {
     try {
         const parsed = parse(text);
-        const parsedDiff = diffFromDefaults(parsed as Parameters<typeof load>[0]) as Record<string, string | string[]>;
+        const parsedDiff = diffFromDefaults(parsed) as Record<string, string | string[]>;
         return {source, text, parsed, parsedDiff, parseError: false};
     }
     catch {

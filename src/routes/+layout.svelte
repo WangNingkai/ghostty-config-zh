@@ -39,7 +39,7 @@
         add("selection-fg", resolveCellColor(config.selectionForeground, fg, bg) || bg);
         add("cursor-color", resolveCellColor(config.cursorColor, fg, bg) || fg);
         add("cursor-text", resolveCellColor(config.cursorText, fg, bg) || bg);
-        add("cursor-opacity", String(config.cursorOpacity ?? 1));
+        add("cursor-opacity", config.cursorOpacity);
 
         // Add the palette colors
         const paletteSize = 16; // config.palette.length;

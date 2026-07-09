@@ -48,7 +48,8 @@ export function parse(configString: string) {
 
             // Repeatable settings (e.g. font-family) may appear on multiple lines; accumulate
             // them into an array rather than letting later lines overwrite earlier ones.
-            if (registry[newKey as keyof typeof registry]?.type === "repeatable-text") {
+            const entry = registry[newKey as keyof typeof registry] as {repeatable?: boolean} | undefined;
+            if (entry?.repeatable) {
                 const existing = results[newKey];
                 if (Array.isArray(existing)) existing.push(normalized);
                 else results[newKey] = [normalized];

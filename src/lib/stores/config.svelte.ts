@@ -1,7 +1,6 @@
 import {dev} from "$app/environment";
 import {registry, type SettingDefaults, type SettingValues} from "$lib/settings/registry";
 import {runInitializers} from "$lib/settings/initializers";
-import themes from "$lib/data/themes";
 
 
 // Run initializers before setting up defaults to ensure that any dynamic options are populated
@@ -106,40 +105,9 @@ export function load(conf: Partial<typeof config>) {
     }
 }
 
-export function setColorScheme(name: string): boolean {
-    if (name === "") {
-        resetColorScheme();
-        return true;
-    }
-
-    const theme = themes[name as keyof typeof themes];
-    if (!theme) return false;
-
-    // Clear out any extra keys the next theme doesn't use
-    resetColorScheme();
-    load(theme);
-    return true;
-}
-
-export function resetColorScheme() {
-    const keys = [
-        "background",
-        "foreground",
-        "cursorColor",
-        "cursorText",
-        "selectionBackground",
-        "selectionForeground"
-    ] as Array<keyof SettingValues>;
-
-    for (const key of keys) {
-        // @ts-expect-error doing this properly is hard
-        config[key] = defaults[key];
-    }
-
-    for (let c = 0; c < defaults.palette.length; c++) {
-        config.palette[c] = defaults.palette[c];
-    }
-}
+// NOTE: theme colors are never written into this store. Selecting a theme only sets the
+// `theme` string; the displayed colors are derived in stores/theme.svelte.ts (effectiveColors),
+// which is why diff() needs no theme-exclusion logic to keep exports clean.
 
 export function resetSetting(key: keyof SettingValues) {
     const defaultValue = defaults[key];

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import {dualNumberCodec, type LinkedValue} from "$lib/settings/codecs";
     import LinkedInput from "./LinkedInput.svelte";
     import Number from "./Number.svelte";
 
@@ -12,26 +13,12 @@
 
     // eslint-disable-next-line prefer-const
     let {value = $bindable("0"), labels, min, max, step = 1}: Props = $props();
-
-    function parse(raw: string) {
-        const parts = raw.split(",").map(p => parseFloat(p.trim()));
-        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
-            return {first: String(parts[0]), second: String(parts[1]), linked: false};
-        }
-        const single = parseFloat(raw);
-        const v = isNaN(single) ? 0 : single;
-        return {first: String(v), second: String(v), linked: true};
-    }
-
-    function serialize({first, second, linked}: {first: string; second: string; linked: boolean}): string {
-        return linked ? first : `${first},${second}`;
-    }
 </script>
 
-<LinkedInput bind:value {labels} {parse} {serialize}>
+<LinkedInput bind:value {labels} parse={(raw: string) => dualNumberCodec.parse(raw)} serialize={(v: LinkedValue) => dualNumberCodec.serialize(v)}>
     {#snippet control(num: string, setNum: (next: string) => void)}
         <Number
-            value={num === "" ? undefined : parseFloat(num)}
+            value={num}
             size={2}
             {min}
             {max}

@@ -1,36 +1,15 @@
 <script lang="ts">
+    import {scrollMultiplierCodec} from "$lib/settings/codecs";
     import DualNumber from "./DualNumber.svelte";
 
     interface Props { value: string; }
     let {value = $bindable("")}: Props = $props();
 
-    function parse(raw: string): string {
-        // translate scroll-multiplier's format into DualNumber's "a,b" or "a" format
-        const trimmed = raw.trim();
-        if (trimmed === "") return "1,3"; // default discrete=3, precision=1... see below
-        if (!trimmed.includes(":")) return trimmed; // already bare/uniform
-        let discrete = 3, precision = 1;
-        for (const part of trimmed.split(",").map(p => p.trim())) {
-            const [prefix, num] = part.split(":");
-            const n = parseFloat(num);
-            if (isNaN(n)) continue;
-            if (prefix === "discrete") discrete = n;
-            if (prefix === "precision") precision = n;
-        }
-        return `${precision},${discrete}`; // DualNumber's pair format
-    }
-
-    function serialize(dualValue: string): string {
-        const parts = dualValue.split(",").map(p => parseFloat(p.trim()));
-        if (parts.length === 1) return String(parts[0]); // uniform
-        const [precision, discrete] = parts;
-        return `precision:${precision},discrete:${discrete}`;
-    }
-
-    const dualValue = $derived(parse(value));
+    // The codec translates Ghostty's `precision:x,discrete:y` <-> DualNumber's `"x,y"` pair form.
+    const dualValue = $derived(scrollMultiplierCodec.parse(value));
 
     function onChange(next: string) {
-        value = serialize(next);
+        value = scrollMultiplierCodec.serialize(next);
     }
 </script>
 

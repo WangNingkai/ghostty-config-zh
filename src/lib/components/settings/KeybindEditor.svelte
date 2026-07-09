@@ -266,11 +266,11 @@
             {#if getCurrentAction()?.type === "enum"}
                 <Dropdown bind:value={actionArg} options={dropdownOptions} />
             {:else if getCurrentAction()?.type === "number"}
-                <Number bind:value={() => parseFloat(actionArg), (v: number) => actionArg = v?.toString()} />
+                <Number bind:value={actionArg} integer={false} />
             {:else if getCurrentAction()?.type === "integer"}
-                <Number bind:value={() => parseInt(actionArg, 10), (v: number) => actionArg = v?.toString()} step={1} />
+                <Number bind:value={actionArg} step={1} />
             {:else if getCurrentAction()?.type === "unsignedInteger"}
-                <Number bind:value={() => parseInt(actionArg, 10), (v: number) => actionArg = v?.toString()} min={getCurrentAction()?.min ?? 0} step={1} />
+                <Number bind:value={actionArg} min={getCurrentAction()?.min ?? 0} step={1} />
             {:else if getCurrentAction()?.type === "resize"}
                 <!-- TODO: should these be split to separate rows? -->
                 <Dropdown
@@ -280,7 +280,7 @@
                         value: direction
                     }))}
                 />
-                <Number bind:value={() => parseInt(resizeAmount, 10), (v: number) => resizeAmount = v?.toString()} min={0} step={1} placeholder="pixels" />
+                <Number bind:value={resizeAmount} min={0} step={1} placeholder="pixels" />
             {:else if getCurrentAction()?.type === "text"}
                 <Text bind:value={actionArg} placeholder="Zig string literal" />
             {:else if getCurrentAction()?.type === "free"}

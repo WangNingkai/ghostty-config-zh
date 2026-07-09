@@ -1,8 +1,9 @@
 <script lang="ts">
     import {countDecimalPlaces} from "$lib/utils/numbers";
+    import {numberCodec} from "$lib/settings/codecs";
 
     type Props = {
-        value: number | undefined;
+        value: string; // flat-store string; parsed to a number internally via numberCodec
         min?: number;
         max?: number;
         step?: number;
@@ -15,31 +16,34 @@
 
     // why is eslint like this smh
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(), min, max, step = 1, size, placeholder, integer = true, onchange, disabled}: Props = $props();
+    let {value = $bindable(""), min, max, step = 1, size, placeholder, integer = true, onchange, disabled}: Props = $props();
 
+    // The bound `value` is a string; all the numeric math below works off this parsed number
+    // (undefined means "no value" / empty input).
+    const num = $derived(numberCodec.parse(value));
 
-    const wasInitiallyUndefined = value === undefined;
+    const wasInitiallyUndefined = numberCodec.parse(value) === undefined;
 
     // Check if the current value is valid (within min/max bounds)
     // undefined and NaN are considered valid (they just mean "no value")
     const isValid = $derived(() => {
-        if (value === undefined || Number.isNaN(value)) return true;
-        if (min !== undefined && value < min) return false;
-        if (max !== undefined && value > max) return false;
+        if (num === undefined || Number.isNaN(num)) return true;
+        if (min !== undefined && num < min) return false;
+        if (max !== undefined && num > max) return false;
         return true;
     });
 
     // Display value - show empty string if undefined, NaN, or invalid
     const displayValue = $derived.by(() => {
-        if (value === undefined || Number.isNaN(value)) return "";
+        if (num === undefined || Number.isNaN(num)) return "";
         if (!isValid()) return "";
-        return value.toString();
+        return num.toString();
     });
 
     // Determine if the input should be treated as an integer based on props and value
     const isDetectedAsInteger = $derived.by(() => {
-        if (value === undefined || Number.isNaN(value)) return false;
-        if (!Number.isInteger(value)) return false;
+        if (num === undefined || Number.isNaN(num)) return false;
+        if (!Number.isInteger(num)) return false;
         if (step !== undefined && !Number.isInteger(step)) return false;
         if (min !== undefined && !Number.isInteger(min)) return false;
         if (max !== undefined && !Number.isInteger(max)) return false;
@@ -54,24 +58,24 @@
 
     $effect(() => {
         if (!size) {
-            const referenceValue = (value !== undefined && !Number.isNaN(value) && isValid()) ? value : (max ?? 100);
+            const referenceValue = (num !== undefined && !Number.isNaN(num) && isValid()) ? num : (max ?? 100);
             size = referenceValue.toString().length + 2;
         }
     });
 
     function commit(next: number | undefined) {
-        value = next;
+        value = numberCodec.serialize(next);
         onchange?.(next);
     }
 
     function increment() {
         // If current value is undefined, NaN, or invalid, start from min (or 0)
-        if (value === undefined || Number.isNaN(value) || !isValid()) {
+        if (num === undefined || Number.isNaN(num) || !isValid()) {
             commit(min ?? 0);
             return;
         }
 
-        const newValue = value + step;
+        const newValue = num + step;
         if (max === undefined || newValue <= max) {
             commit(isActuallyInteger ? newValue : parseFloat(newValue.toFixed(maxDecimalPlaces)));
         }
@@ -79,12 +83,12 @@
 
     function decrement() {
         // If current value is undefined, NaN, or invalid, start from max (or min, or 0)
-        if (value === undefined || Number.isNaN(value) || !isValid()) {
+        if (num === undefined || Number.isNaN(num) || !isValid()) {
             commit(max ?? Math.max(0, min ?? 0));
             return;
         }
 
-        const newValue = value - step;
+        const newValue = num - step;
         if (min === undefined || newValue >= min) {
             commit(isActuallyInteger ? newValue : parseFloat(newValue.toFixed(maxDecimalPlaces)));
         }
@@ -129,15 +133,6 @@
         const target = e.target as HTMLInputElement;
         target.value = displayValue;
     }
-
-    // TODO: Make this unnecesary by having the `parse()` function actually convert stuff to numbers
-    // Make sure if the value was set to string externally, we convert it to a number
-    // Use an IIFE to do this synchronously during init and make svelte stop complaining
-    (() => {
-        if (typeof value === "string") {
-            commit(isActuallyInteger ? parseInt(value, 10) : parseFloat(value));
-        }
-    })();
 </script>
 
 

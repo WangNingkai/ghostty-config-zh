@@ -11,9 +11,10 @@
         // overrides elsewhere. Without it, plain two-way binding as before.
         onSet?: (index: number, color: HexColor) => void;
         resetMessage?: string; // per-swatch right-click toast override (see Color)
+        swatchTooltip?: (index: number) => string | undefined; // per-index hover tooltip (e.g. theme-inheritance tier)
     }
 
-    const {value = $bindable([]), defaultValue, onSet, resetMessage}: Props = $props();
+    const {value = $bindable([]), defaultValue, onSet, resetMessage, swatchTooltip}: Props = $props();
 
     const countPerRow = $derived(defaultValue.length >= 8 ? 8 : defaultValue.length);
     const numRows = $derived(Math.ceil(defaultValue.length / countPerRow));
@@ -22,7 +23,7 @@
 <div class="grid-container">
     <div class="color-grid" style:--count-per-row={countPerRow} style:--num-rows={numRows}>
         {#each value as _, i (i)}
-            <Color defaultValue={defaultValue[i]} bind:value={() => value[i], (v: HexColor) => onSet ? onSet(i, v) : value[i] = v} size={40} label={(i + 1).toString()} {resetMessage} />
+            <Color defaultValue={defaultValue[i]} bind:value={() => value[i], (v: HexColor) => onSet ? onSet(i, v) : value[i] = v} size={40} label={(i + 1).toString()} {resetMessage} tooltip={swatchTooltip?.(i)} />
         {/each}
     </div>
 </div>

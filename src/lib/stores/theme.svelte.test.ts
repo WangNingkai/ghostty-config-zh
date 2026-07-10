@@ -1,7 +1,7 @@
 import {afterEach, describe, expect, it} from "vitest";
 import themes from "$lib/data/themes";
 import config, {defaults, diff, resetSetting} from "./config.svelte";
-import {activeThemeName, colorTier, effectiveColors, preview, themeSelection} from "./theme.svelte";
+import {activeThemeName, colorTier, effectiveColors, paletteTier, preview, themeSelection} from "./theme.svelte";
 
 // Two real themes with distinct, defined backgrounds, picked dynamically so the tests don't
 // break when the generated themes data is re-synced.
@@ -89,6 +89,15 @@ describe("colorTier / activeThemeName", () => {
         expect(colorTier("palette")).toBe("theme");
         config.palette[3] = "#ff00ff";
         expect(colorTier("palette")).toBe("override");
+    });
+
+    it("classifies palette tiers per index", () => {
+        config.theme = nameA;
+        config.palette[3] = "#ff00ff";
+        expect(paletteTier(3)).toBe("override");
+        expect(paletteTier(0)).toBe("theme"); // themes provide the first 16
+        expect(paletteTier(200)).toBe("default"); // beyond the theme's 16
+        expect(paletteTier(0)).not.toBe(paletteTier(3)); // mixed state is per-index
     });
 
     it("activeThemeName resolves only known themes (dual: the previewed half)", () => {

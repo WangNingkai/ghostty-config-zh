@@ -4,6 +4,7 @@
     import ColorPicker from "$lib/components/ColorPicker.svelte";
     import {success} from "$lib/stores/toasts.svelte";
     import {toAppWindow} from "$lib/attachments/portal";
+    import {createTooltipAttachment} from "$lib/attachments/tooltip";
 
     interface Props {
         value: HexColor;
@@ -12,10 +13,12 @@
         defaultValue?: HexColor;
         disabled?: boolean;
         resetMessage?: string; // right-click toast override, e.g. "now follows the theme" while a theme is active
+        tooltip?: string; // hover tooltip on the swatch, e.g. its theme-inheritance state
     }
 
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(), size = 20, label = "", defaultValue, disabled = false, resetMessage}: Props = $props();
+    let {value = $bindable(), size = 20, label = "", defaultValue, disabled = false, resetMessage, tooltip}: Props = $props();
+    const swatchTooltip = createTooltipAttachment(() => tooltip ?? "");
     const borderColor = $derived(`rgba(255, 255, 255, ${(value ? luminosity(value) : 0) * 0.0027451 + 0.3})`);
     const labelColor = $derived(value && isDark(value) ? `var(--font-color)` : "black");
     let popoutOpen = $state(false);
@@ -46,7 +49,7 @@
 
 <svelte:document onkeydown={keydown} />
 
-<div class="color-wrap" style:width="{size}px" style:height="{size}px" style:background-color={value} style:border-color={borderColor} class:disabled>
+<div class="color-wrap" style:width="{size}px" style:height="{size}px" style:background-color={value} style:border-color={borderColor} class:disabled {@attach swatchTooltip}>
     {#if label}<span class="label" style:color={labelColor}>{label}</span>{/if}
     <input type="color" bind:value style:width="{size}px" style:height="{size}px" onclick={click} oncontextmenu={reset} {disabled} />
 </div>

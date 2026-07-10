@@ -85,3 +85,10 @@ export function colorTier(key: SchemeColorKey | "palette"): ColorTier {
     if (key === "palette") return themeColors ? "theme" : "default";
     return themeColors?.[key] !== undefined ? "theme" : "default";
 }
+
+/** Per-index palette tier — the palette is the one setting whose tiers vary per index
+ * (themes provide the first 16; anything the user edited is an override). */
+export function paletteTier(index: number): ColorTier {
+    if (config.palette[index] !== defaults.palette[index]) return "override";
+    return themeColors?.palette?.[index] !== undefined ? "theme" : "default";
+}

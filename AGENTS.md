@@ -70,8 +70,18 @@ Live config state as a Svelte 5 `$state` object. Key exports:
 - `diff()` - returns only keys differing from defaults; the serialization source of truth
 - `diffFromDefaults(conf)` - same logic applied to an arbitrary config object (import preview)
 - `load(conf)` - merges a parsed config into live state
-- `setColorScheme(name)` / `resetColorScheme()` - applies/clears a theme without leaking theme colors into serialized output
 - `resetSetting(key)` / `isNonDefault(key)` - per-setting utilities
+
+Theme colors are **never written into this store** — selecting a theme only sets the `theme` string. That is why `diff()` needs no exclusion logic to keep exports clean; do not reintroduce any "apply theme colors to config" helper.
+
+### `src/lib/stores/theme.svelte.ts`
+
+The theme-layering view-model. For each color key (`background`, `foreground`, `cursorColor`, `cursorText`, `selectionBackground`, `selectionForeground`, `palette` element-wise), `effectiveColors()` resolves **explicit override > active theme > app default**; `preview.mode` (ephemeral view state, never serialized) picks which half of a `light:A,dark:B` dual theme renders; `parseTheme` in `codecs.ts` owns the string shape. Consumers of `effectiveColors()` are deliberately few:
+
+- **`+layout.svelte` is the single color-key read funnel** — it resolves effective colors into the global `--config-*` CSS vars. Every preview/surface (chrome, `CursorPreview`, the DOM terminal) reads those CSS vars only, inheriting layered colors for free. Do not add new direct readers of `config.<colorkey>` or `effectiveColors()` in components; read the vars. This is machine-enforced: a `no-restricted-syntax` rule in `eslint.config.js` rejects direct `config` color-key access outside the store, the resolver, and the settings renderer.
+- **The color editors in the settings renderer** display effective colors and write *overrides* into `config` (palette edits are per-index — never write a whole themed array into `config.palette`, that would re-create the export leak).
+
+Override detection is value-inferred (`isNonDefault`, i.e. value ≠ app default) — the same rule `diff()` uses, kept deliberately consistent.
 
 ## Generated files: never hand-edit
 

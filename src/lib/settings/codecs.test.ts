@@ -8,6 +8,7 @@ import {
     numberCodec,
     numberUnitsCodec,
     parseDuration,
+    parseTheme,
     scrollMultiplierCodec,
 } from "./codecs";
 import type {FeatureDef} from "./types";
@@ -110,6 +111,27 @@ describe("dualThemeCodec", () => {
 
     it("serializes the pair form", () => {
         expect(dualThemeCodec.serialize({first: "Day", second: "Night", linked: false})).toBe("light:Day,dark:Night");
+    });
+});
+
+describe("parseTheme", () => {
+    it("maps empty/whitespace to unset", () => {
+        expect(parseTheme("")).toEqual({kind: "unset"});
+        expect(parseTheme("   ")).toEqual({kind: "unset"});
+    });
+
+    it("parses a bare name as single, trimmed", () => {
+        expect(parseTheme(" Dracula ")).toEqual({kind: "single", name: "Dracula"});
+    });
+
+    it("parses a light/dark pair as dual, order-independent", () => {
+        expect(parseTheme("light:Day,dark:Night")).toEqual({kind: "dual", light: "Day", dark: "Night"});
+        expect(parseTheme("dark:Night,light:Day")).toEqual({kind: "dual", light: "Day", dark: "Night"});
+        expect(parseTheme(" light: Day ,dark: Night ")).toEqual({kind: "dual", light: "Day", dark: "Night"});
+    });
+
+    it("treats a half-specified pair as a single name (both modes required for the pair form)", () => {
+        expect(parseTheme("light:Day")).toEqual({kind: "single", name: "light:Day"});
     });
 });
 

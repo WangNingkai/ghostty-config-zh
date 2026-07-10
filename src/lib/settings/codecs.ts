@@ -134,6 +134,29 @@ export const dualThemeCodec: Codec<LinkedValue> = {
 };
 
 
+/**
+ * Theme selection: `""` | `"Name"` | `"light:A,dark:B"` -> a discriminated view for the
+ * effective-colors resolver and the dual-preview toggle. Built on dualThemeCodec's pair
+ * parsing so the DualTheme widget and the resolver share one source of truth for the syntax.
+ */
+export type ThemeSelection =
+    | {kind: "unset"}
+    | {kind: "single"; name: string}
+    | {kind: "dual"; light: string; dark: string};
+
+/**
+ * `single` covers built-in names AND custom names/absolute paths — an unknown name can't be
+ * previewed, but the string still round-trips through the store, so imports lose nothing.
+ */
+export function parseTheme(raw: string): ThemeSelection {
+    const trimmed = raw.trim();
+    if (trimmed === "") return {kind: "unset"};
+    const {first, second, linked} = dualThemeCodec.parse(trimmed);
+    if (!linked) return {kind: "dual", light: first, dark: second};
+    return {kind: "single", name: trimmed};
+}
+
+
 
 /**
  * Scroll multiplier: Ghostty's `precision:x,discrete:y` <-> DualNumber's `"x,y"` pair form

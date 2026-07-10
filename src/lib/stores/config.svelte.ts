@@ -1,7 +1,6 @@
 import {dev} from "$app/environment";
 import {registry, type SettingDefaults, type SettingValues} from "$lib/settings/registry";
 import {runInitializers} from "$lib/settings/initializers";
-import themes from "$lib/data/themes";
 
 
 // Run initializers before setting up defaults to ensure that any dynamic options are populated
@@ -91,8 +90,7 @@ export function load(conf: Partial<typeof config>) {
     for (const key in conf) {
         if (!(key in config)) continue;
         if (key !== "keybind" && key !== "palette") {
-            // @ts-expect-error doing this properly is hard
-            config[key as keyof typeof config] = conf[key as keyof typeof config]!;
+            setSetting(key as keyof typeof config, conf[key as keyof typeof config]!);
         }
         else if (key === "keybind") {
             config.keybind = [...config.keybind, ...conf.keybind!];
@@ -106,45 +104,21 @@ export function load(conf: Partial<typeof config>) {
     }
 }
 
-export function setColorScheme(name: string): boolean {
-    if (name === "") {
-        resetColorScheme();
-        return true;
-    }
+// NOTE: theme colors are never written into this store. Selecting a theme only sets the
+// `theme` string; the displayed colors are derived in stores/theme.svelte.ts (effectiveColors),
+// which is why diff() needs no theme-exclusion logic to keep exports clean.
 
-    const theme = themes[name as keyof typeof themes];
-    if (!theme) return false;
-
-    // Clear out any extra keys the next theme doesn't use
-    resetColorScheme();
-    load(theme);
-    return true;
-}
-
-export function resetColorScheme() {
-    const keys = [
-        "background",
-        "foreground",
-        "cursorColor",
-        "cursorText",
-        "selectionBackground",
-        "selectionForeground"
-    ] as Array<keyof SettingValues>;
-
-    for (const key of keys) {
-        // @ts-expect-error doing this properly is hard
-        config[key] = defaults[key];
-    }
-
-    for (let c = 0; c < defaults.palette.length; c++) {
-        config.palette[c] = defaults.palette[c];
-    }
+/**
+ * Typed single-setting write. Prefer this over assigning through a widened `config[key]`
+ * lvalue in components — the generic ties the value type to the key, no cast needed.
+ * */
+export function setSetting<K extends keyof SettingValues>(key: K, value: SettingValues[K]) {
+    config[key] = value;
 }
 
 export function resetSetting(key: keyof SettingValues) {
     const defaultValue = defaults[key];
-    // @ts-expect-error doing this properly is hard
-    config[key] = Array.isArray(defaultValue) ? [...defaultValue] : defaultValue;
+    setSetting(key, Array.isArray(defaultValue) ? [...defaultValue] : defaultValue);
 }
 
 export function isNonDefault(key: keyof SettingValues): boolean {

@@ -26,7 +26,15 @@
     let first = $state("");
     let second = $state("");
     let linked = $state(false);
+
+    // The value we last wrote ourselves. Skipping the reseed for our own commits lets a
+    // consumer's `serialize` canonicalize an in-progress draft (e.g. DualTheme collapsing an
+    // unlinked pair with an empty side to the single form) without the round-trip clobbering
+    // the draft the user is still editing. External writes (reset, import) still reseed.
+    let lastCommitted: string | null = null;
     $effect(() => {
+        if (value === lastCommitted) return;
+        lastCommitted = null;
         const initial = parse(value);
         first = initial.first;
         second = initial.second;
@@ -34,7 +42,8 @@
     });
 
     function commit() {
-        value = serialize({first, second, linked});
+        lastCommitted = serialize({first, second, linked});
+        value = lastCommitted;
     }
 
     function setSide(which: "first" | "second", next: string) {

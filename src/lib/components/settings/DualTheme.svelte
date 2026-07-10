@@ -10,9 +10,18 @@
 
     // eslint-disable-next-line prefer-const
     let {value = $bindable(""), options}: Props = $props();
+
+    // Ghostty's pair form requires BOTH halves (`light:A,dark:B`); an unlinked draft with an
+    // empty side would serialize to a malformed value like `light:,dark:B` and leak into the
+    // exported config. Collapse such drafts to the single form (or ""), keeping the store valid
+    // at every keystroke — LinkedInput keeps the visual draft alive across our canonicalization.
+    function serializeTheme(v: LinkedValue): string {
+        if (!v.linked && (v.first === "" || v.second === "")) return v.first || v.second;
+        return dualThemeCodec.serialize(v);
+    }
 </script>
 
-<LinkedInput bind:value labels={["Light", "Dark"]} parse={(raw: string) => dualThemeCodec.parse(raw)} serialize={(v: LinkedValue) => dualThemeCodec.serialize(v)}>
+<LinkedInput bind:value labels={["Light", "Dark"]} parse={(raw: string) => dualThemeCodec.parse(raw)} serialize={serializeTheme}>
     {#snippet control(theme: string, setTheme: (next: string) => void)}
         <Dropdown
             value={theme}

@@ -10,7 +10,7 @@
     import registry from "$lib/settings/registry";
     import navigation from "$lib/settings/navigation";
     import config, {isNonDefault, resetSetting} from "$lib/stores/config.svelte";
-    import {effectiveColors, isSchemeColorKey, themeSelection} from "$lib/stores/theme.svelte";
+    import {activeThemeName, colorTier, effectiveColors, isSchemeColorKey, themeSelection} from "$lib/stores/theme.svelte";
     import Text from "$lib/components/settings/Text.svelte";
     import Number from "$lib/components/settings/Number.svelte";
     import Dropdown from "$lib/components/settings/Dropdown.svelte";
@@ -58,6 +58,16 @@
     function isThemedColor(settingId: keyof typeof registry): boolean {
         return themeActive && (isSchemeColorKey(settingId) || settingId === "palette");
     }
+
+    // Tier badge: mark color rows whose displayed value currently comes from the active theme
+    // (an explicit override shows the reset arrow instead; app defaults show nothing). The
+    // palette keeps its badge even when partially overridden — un-edited swatches still follow.
+    function themeBadgeText(settingId: keyof typeof registry): string | undefined {
+        const theme = activeThemeName();
+        if (!theme) return undefined;
+        const follows = settingId === "palette" || (isSchemeColorKey(settingId) && colorTier(settingId) === "theme");
+        return follows ? `Inherited from "${theme}", edit to create an override` : undefined;
+    }
 </script>
 
 
@@ -89,6 +99,7 @@
                         since={setting.since}
                         description={widget?.type === "palette" ? undefined : setting.description}
                         isNonDefault={isNonDefault(settingId)}
+                        themeBadge={themeBadgeText(settingId)}
                         onReset={() => {
                             resetSetting(settingId);
                             success(isThemedColor(settingId) ? `${setting.name} now follows the theme` : `${setting.name} reset to default`);

@@ -20,14 +20,17 @@ export const preview = $state<{mode: PreviewMode;}>({mode: prefersLight ? "light
 
 const selection = $derived(parseTheme(config.theme));
 
-const themeColors = $derived.by((): ColorScheme | null => {
+const activeTheme = $derived.by((): {name: string, colors: ColorScheme;} | null => {
     let name: string | null = null;
     if (selection.kind === "single") name = selection.name;
     else if (selection.kind === "dual") name = preview.mode === "light" ? selection.light : selection.dark;
     if (name === null) return null;
     // Unknown/custom names (or absolute paths) can't be previewed; the string still round-trips.
-    return (themes as Record<string, ColorScheme>)[name] ?? null;
+    const colors = (themes as Record<string, ColorScheme>)[name];
+    return colors ? {name, colors} : null;
 });
+
+const themeColors = $derived(activeTheme?.colors ?? null);
 
 const SCHEME_KEYS = ["background", "foreground", "cursorColor", "cursorText", "selectionBackground", "selectionForeground"] as const;
 export type SchemeColorKey = typeof SCHEME_KEYS[number];
@@ -62,4 +65,23 @@ export function themeSelection() {
 
 export function effectiveColors() {
     return effective;
+}
+
+/** The name of the theme currently driving the preview (dual: the previewed half), or null
+ * when no theme is set or the name doesn't resolve to known theme data. */
+export function activeThemeName(): string | null {
+    return activeTheme?.name ?? null;
+}
+
+export type ColorTier = "override" | "theme" | "default";
+
+/**
+ * Which source a color key's *displayed* value comes from — the tier-badge classifier.
+ * Note: an overridden palette reports "override" even though un-edited indices still follow
+ * the theme; per-index tiers can be derived the same way if a per-swatch UI ever wants them.
+ */
+export function colorTier(key: SchemeColorKey | "palette"): ColorTier {
+    if (isNonDefault(key)) return "override";
+    if (key === "palette") return themeColors ? "theme" : "default";
+    return themeColors?.[key] !== undefined ? "theme" : "default";
 }

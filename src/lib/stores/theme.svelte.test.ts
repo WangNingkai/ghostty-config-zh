@@ -1,7 +1,7 @@
 import {afterEach, describe, expect, it} from "vitest";
 import themes from "$lib/data/themes";
 import config, {defaults, diff, resetSetting} from "./config.svelte";
-import {effectiveColors, preview, themeSelection} from "./theme.svelte";
+import {activeThemeName, colorTier, effectiveColors, preview, themeSelection} from "./theme.svelte";
 
 // Two real themes with distinct, defined backgrounds, picked dynamically so the tests don't
 // break when the generated themes data is re-synced.
@@ -70,6 +70,35 @@ describe("effectiveColors", () => {
         config.theme = partialEntry![0];
         expect(effectiveColors().selectionBackground).toBe(defaults.selectionBackground);
         expect(effectiveColors().background).toBe(partialEntry![1].background);
+    });
+});
+
+describe("colorTier / activeThemeName", () => {
+    it("classifies default -> theme -> override transitions", () => {
+        expect(colorTier("background")).toBe("default");
+        config.theme = nameA;
+        expect(colorTier("background")).toBe("theme");
+        config.background = "#123456";
+        expect(colorTier("background")).toBe("override");
+        resetSetting("background");
+        expect(colorTier("background")).toBe("theme");
+    });
+
+    it("classifies the palette as a whole (any edited index -> override)", () => {
+        config.theme = nameA;
+        expect(colorTier("palette")).toBe("theme");
+        config.palette[3] = "#ff00ff";
+        expect(colorTier("palette")).toBe("override");
+    });
+
+    it("activeThemeName resolves only known themes (dual: the previewed half)", () => {
+        expect(activeThemeName()).toBeNull();
+        config.theme = "Not A Real Theme";
+        expect(activeThemeName()).toBeNull();
+        config.theme = `light:${nameA},dark:${nameB}`;
+        expect(activeThemeName()).toBe(nameB); // preview defaults to dark in tests
+        preview.mode = "light";
+        expect(activeThemeName()).toBe(nameA);
     });
 });
 

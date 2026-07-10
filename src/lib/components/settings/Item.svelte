@@ -18,9 +18,12 @@
         onReset?: () => void;
         isNonDefault?: boolean;
         inline?: boolean;
+        // Tooltip text; when present, a "theme" badge marks the value as coming from the
+        // active theme (rather than an explicit override or the app default).
+        themeBadge?: string;
     }
 
-    const {name = "", note = "", platform, since, description, settingId, children, onReset, isNonDefault = false, inline = true}: Props = $props();
+    const {name = "", note = "", platform, since, description, settingId, children, onReset, isNonDefault = false, inline = true, themeBadge}: Props = $props();
     const tooltipAttachment = createTooltipAttachment("Reset to default");
 
 
@@ -43,16 +46,18 @@
     };
 
     const infoBadges = $derived.by(() => {
-        const badges: Array<{label: string, type: "platform" | "version"}> = [];
+        const badges: Array<{label: string, type: "platform" | "version" | "theme"}> = [];
         const platformBadge = getPlatformBadgeLabel(platformLabels);
         if (platformBadge) badges.push({label: platformBadge, type: "platform"});
         if (since) badges.push({label: since, type: "version"});
+        if (themeBadge) badges.push({label: "From theme", type: "theme"});
         return badges;
     });
 
-    const getBadgeTooltip = (badge: {label: string, type: "platform" | "version"}) => {
+    const getBadgeTooltip = (badge: {label: string, type: "platform" | "version" | "theme"}) => {
         if (badge.type === "platform") return platformLabels.length > 1 ? `Available on: ${platformLabels.join(", ")}` : `Platform: ${platformLabels[0]}`;
         if (badge.type === "version") return `Added in Ghostty v${since}`;
+        if (badge.type === "theme") return themeBadge ?? "";
         return "";
     };
 

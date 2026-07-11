@@ -14,12 +14,19 @@ import linux from "$lib/images/tabs/linux.webp";
 import macos from "$lib/images/tabs/macos.webp";
 
 import {registry} from "./registry";
+import type {PreviewKey} from "./types";
 import {dev} from "$app/environment";
+
+/* eslint quote-props: ["error", "consistent-as-needed", {"keywords": false}] */
 
 interface NavGroup {
     id: string;
     name: string;
     note?: string;
+    // Key into the renderer-side `previews` map. A string-union type (not a `Component` ref),
+    // so navigation.ts stays pure data while the key stays checked against the map.
+    preview?: PreviewKey;
+    // Placement only, everything about a setting (widget included) lives on its registry entry.
     settings: Array<keyof typeof registry>;
 }
 
@@ -254,6 +261,7 @@ export const navigation = [
                 id: "base",
                 name: "Base Colors",
                 note: "The preview here shows selected text in the second line of the command output.",
+                preview: "baseColor",
                 settings: [
                     "background",
                     "foreground",
@@ -278,6 +286,7 @@ export const navigation = [
                 id: "cursor",
                 name: "Cursor",
                 note: "The cursor in this preview blinks on and off at 1 second intervals for emphasis, it may not match what you see in Ghostty!",
+                preview: "cursor",
                 settings: [
                     "cursorColor",
                     "cursorText",
@@ -290,6 +299,7 @@ export const navigation = [
                 id: "palette",
                 name: "Color Palette",
                 note: "The first 16 colors are the most commonly displayed colors in the terminal.\n\nColors 1-8 are typically black, red, green, yellow, blue, magenta, cyan, and white.\nColors 9-16 are typically \"brighter\" variants of these colors.",
+                preview: "palette",
                 settings: [
                     "palette"
                 ]
@@ -489,6 +499,7 @@ export const navigation = [
                 id: "icon",
                 name: "App Icon",
                 note: "If you choose the <code>custom-style</code> option, you can use any of the other icon settings to customize your icon with a live preview.",
+                preview: "appIcon",
                 settings: [
                     "macosIcon",
                     "macosCustomIcon",

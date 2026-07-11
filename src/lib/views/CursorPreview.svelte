@@ -1,6 +1,5 @@
 <script lang="ts">
     import config from "$lib/stores/config.svelte";
-    import {resolveCellColor} from "$lib/utils/colors";
     import {onMount} from "svelte";
 
     let isCursorVisible = $state(true);
@@ -12,12 +11,6 @@
         }, 1000);
         return () => clearInterval(interval);
     });
-
-    // TODO: make less gross with less ternaries
-    // cursorColor/cursorText may be `cell-foreground`/`cell-background` keywords; resolve them.
-    const cursorColor = $derived(resolveCellColor(config.cursorColor, config.foreground, config.background) || config.foreground);
-    const cursorText = $derived(isCursorVisible ? resolveCellColor(config.cursorText, config.foreground, config.background) || config.background : config.foreground);
-    const cursorOpacity = $derived(isCursorVisible ? Math.round(config.cursorOpacity * 255).toString(16) : "00");
 </script>
 
 <div class="preview">
@@ -26,7 +19,7 @@
         <span style:color="var(--config-palette-6)">@</span>
         <span style:color="var(--config-palette-4)">doe-pc</span>
         <span style:color="var(--config-palette-1)" style:font-weight="700">$</span>
-        git commit -m "<span class="cursor {config.cursorStyle}" style:color={cursorText} style:border-color="{cursorColor}{cursorOpacity}" style:background-color="{cursorColor}{cursorOpacity}">"</span>
+        git commit -m "<span class="cursor {config.cursorStyle}" class:blink-hidden={!isCursorVisible}>"</span>
     </div>
 </div>
 
@@ -52,6 +45,13 @@
 
 .cursor {
     margin-left: 1px;
+    /* +layout resolves cell-keywords/fallbacks into the --config-cursor-* vars, so this view
+       reads colors only through CSS vars. color-mix applies cursor-opacity to the block while
+       the glyph on top stays opaque, matching how Ghostty renders a translucent cursor. */
+    --cursor-fill: color-mix(in srgb, var(--config-cursor-color) calc(var(--config-cursor-opacity) * 100%), transparent);
+    color: var(--config-cursor-text);
+    background-color: var(--cursor-fill);
+    border-color: var(--cursor-fill);
 }
 
 .cursor.bar,
@@ -62,17 +62,25 @@
 }
 
 .cursor.bar {
-    border-left: 1px solid transparent;
+    border-left: 1px solid var(--cursor-fill);
     margin-left: 0;
 }
 
 .cursor.underline {
-    border-bottom: 1px solid transparent;
+    border-bottom: 1px solid var(--cursor-fill);
 }
 
 .cursor.block_hollow {
-    border: 1px solid transparent;
+    border: 1px solid var(--cursor-fill);
     margin-top: -1px;
     margin-left: 0;
+}
+
+/* Blink "off" phase: the block/line disappears, the glyph shows in plain foreground.
+   Kept last so its border reset outranks the per-style border shorthands above. */
+.cursor.blink-hidden {
+    color: var(--config-fg) !important;
+    background-color: transparent !important;
+    border-color: transparent !important;
 }
 </style>

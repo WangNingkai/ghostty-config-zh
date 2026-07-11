@@ -19,7 +19,8 @@
         backdrop-filter: blur(20px);
         color: var(--font-color);
         padding: 10px 18px;
-        white-space: nowrap;
+        white-space: pre-wrap;
+        text-align: center;
         border: 1px solid var(--border-level-1);
         box-shadow:
             0 0 20px -1px rgba(0,0,0,0.7),

@@ -1,15 +1,21 @@
 <script lang="ts">
+    import {boolCodec} from "$lib/settings/codecs";
+
     interface Props {
         disabled?: boolean;
-        checked?: boolean;
+        value?: string; // flat-store string ("true"/"false"); parsed/serialized via boolCodec
         onchange?: (checked: boolean) => void;
     }
+
     // eslint-disable-next-line prefer-const
-    let {disabled = false, checked = $bindable(false), onchange}: Props = $props();
+    let {disabled = false, value = $bindable("false"), onchange}: Props = $props();
+
+    const checked = $derived(boolCodec.parse(value));
 
     function change() {
-        checked = !checked;
-        if (onchange) onchange(checked);
+        const nextChecked = !checked;
+        value = boolCodec.serialize(nextChecked);
+        onchange?.(nextChecked);
     }
 </script>
 

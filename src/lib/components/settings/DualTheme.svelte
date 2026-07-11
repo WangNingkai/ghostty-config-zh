@@ -1,4 +1,5 @@
 <script lang="ts">
+    import {dualThemeCodec, type LinkedValue} from "$lib/settings/codecs";
     import Dropdown from "./Dropdown.svelte";
     import LinkedInput from "./LinkedInput.svelte";
 
@@ -10,43 +11,28 @@
     // eslint-disable-next-line prefer-const
     let {value = $bindable(""), options}: Props = $props();
 
-    // Ghostty accepts a single theme ("Name") or a per-mode pair ("light:Name,dark:Name").
-    // Whitespace is trimmed and light/dark order does not matter; both must be present for the pair form.
-    function parse(raw: string) {
-        const trimmed = raw.trim();
-        let light: string | undefined;
-        let dark: string | undefined;
-
-        for (const part of trimmed.split(",")) {
-            const match = part.match(/^\s*(light|dark)\s*:(.*)$/i);
-            if (!match) continue;
-            if (match[1].toLowerCase() === "light") light = match[2].trim();
-            else dark = match[2].trim();
-        }
-
-        // Only treat it as a pair when both modes are specified, per the docs
-        if (light !== undefined && dark !== undefined) {
-            return {first: light, second: dark, linked: false};
-        }
-        return {first: trimmed, second: trimmed, linked: true};
-    }
-
-    function serialize({first, second, linked}: {first: string; second: string; linked: boolean}): string {
-        return linked ? first : `light:${first},dark:${second}`;
+    // Ghostty's pair form requires BOTH halves (`light:A,dark:B`); an unlinked draft with an
+    // empty side would serialize to a malformed value like `light:,dark:B` and leak into the
+    // exported config. Collapse such drafts to the single form (or ""), keeping the store valid
+    // at every keystroke — LinkedInput keeps the visual draft alive across our canonicalization.
+    function serializeTheme(v: LinkedValue): string {
+        if (!v.linked && (v.first === "" || v.second === "")) return v.first || v.second;
+        return dualThemeCodec.serialize(v);
     }
 </script>
 
-<LinkedInput bind:value labels={["Light", "Dark"]} {parse} {serialize}>
+<LinkedInput bind:value labels={["Light", "Dark"]} parse={(raw: string) => dualThemeCodec.parse(raw)} serialize={serializeTheme} collapseLinked>
     {#snippet control(theme: string, setTheme: (next: string) => void)}
         <Dropdown
             value={theme}
             {options}
             change={setTheme}
-            placeholder="Choose a theme"
+            placeholder="Theme…"
             searchable
             allowEmpty
             emptyLabel="Reset Theme"
             iconSize={32}
+            maxWidth={150}
         />
     {/snippet}
 </LinkedInput>

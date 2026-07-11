@@ -24,14 +24,14 @@
     {widget}
     customDefault="0"
 >
-    <!-- TODO: figure out why eslint can't resolve this -->
-    <!-- eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call -->
+    <!-- TODO: figure out why eslint can't resolve the injected ControlProps callback -->
+    <!-- eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return -->
     {#snippet control({value: customNumber, onChange: setCustom, disabled}: ControlProps)}
         <Number
-            value={customNumber === "" ? undefined : (integer ? parseInt(customNumber, 10) : parseFloat(customNumber))}
+            value={customNumber}
             onchange={(n: number | undefined) => setCustom(n === undefined ? "" : n.toString())}
-            {min} {max} {step} {size} {placeholder} {integer} {disabled}
+            {min} {max} {step} {size} {placeholder} {integer} {disabled} nullable
         />
     {/snippet}
-    <!-- eslint-enable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call -->
+    <!-- eslint-enable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return -->
 </CustomInput>

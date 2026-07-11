@@ -37,10 +37,10 @@
         <Group title="Roadmap">
             <ul>
                 <li><Checkbox />Command palette builder</li>
-                <li><Checkbox />Unit testing import/export</li>
                 <li><Checkbox />Unify color scheme</li>
                 <li><Checkbox />Community presets for quick setup</li>
                 <li><Checkbox />Desktop build of Ghostty Config for direct config integration</li>
+                <li><Checkbox />Real component testing</li>
             </ul>
         </Group>
     </section>

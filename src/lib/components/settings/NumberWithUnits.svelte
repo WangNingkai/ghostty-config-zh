@@ -10,6 +10,7 @@
      * optional "units" feature, since it's basically just a number input with some
      * extra parsing and a pill button group attached.
      */
+    import {numberCodec, numberUnitsCodec, type NumberUnit} from "$lib/settings/codecs";
     import PillButtonGroup from "./PillButtons.svelte";
     import Number from "./Number.svelte";
 
@@ -19,27 +20,7 @@
 
     let {value = $bindable("")}: Props = $props();
 
-    type Unit = "px" | "pct";
-
-
-    function parse(raw: string): { num: number | undefined; unit: Unit } {
-        const trimmed = raw.trim();
-        if (trimmed === "") return {num: undefined, unit: "px"};
-        if (trimmed.endsWith("%")) {
-            const n = parseInt(trimmed.slice(0, -1), 10);
-            return {num: isNaN(n) ? undefined : n, unit: "pct"};
-        }
-        const n = parseInt(trimmed, 10);
-        return {num: isNaN(n) ? undefined : n, unit: "px"};
-    }
-
-    function serialize(num: number | undefined, unit: Unit): string {
-        if (num === undefined) return "";
-        return unit === "pct" ? `${num}%` : String(num);
-    }
-
-
-    const parsed = $derived(parse(value));
+    const parsed = $derived(numberUnitsCodec.parse(value));
 
     // Per-unit reasonable bounds, percentages and pixel offsets have different sane ranges
     const PX_BOUNDS = {min: -100, max: 100};
@@ -48,27 +29,28 @@
     const bounds = $derived(parsed.unit === "pct" ? PCT_BOUNDS : PX_BOUNDS);
 
     function onNumberChange(n: number | undefined) {
-        value = serialize(n, parsed.unit);
+        value = numberUnitsCodec.serialize({num: n, unit: parsed.unit});
     }
 
     function onUnitChange(next: string) {
-        const unit = next as Unit;
+        const unit = next as NumberUnit;
         // Re-serialize the same numeric value under the new unit, clamped to the new unit's bounds
         const newBounds = unit === "pct" ? PCT_BOUNDS : PX_BOUNDS;
         const clamped = parsed.num === undefined
             ? undefined
             : Math.min(newBounds.max, Math.max(newBounds.min, parsed.num));
-        value = serialize(clamped, unit);
+        value = numberUnitsCodec.serialize({num: clamped, unit});
     }
 </script>
 
 <div class="adjust">
     <Number
-        value={parsed.num}
+        value={numberCodec.serialize(parsed.num)}
         min={bounds.min}
         max={bounds.max}
         step={1}
         integer
+        nullable
         placeholder="unset"
         onchange={onNumberChange}
     />

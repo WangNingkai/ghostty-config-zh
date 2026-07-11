@@ -1,49 +1,40 @@
-import type {HexColor} from "$lib/utils/colors";
-
 export type GhosttyPlatform = "macos" | "linux" | "gtk" | "gtk-wayland" | "gtk-x11";
 
-export interface SettingInfo {
+// A registry entry describes a Ghostty *config key* plus the (data-only) widget that renders
+// it. The union is discriminated on `repeatable` aka the one value-shape distinction that matters
+// at the store level — so `satisfies SettingsRegistry` enforces per entry, at compile time,
+// that the `default` shape and the widget kind both agree with the value shape.
+interface SettingInfoBase {
     key: string; // the actual ghostty config key, e.g. "window-padding-x"
     name: string; // display label
     note?: string; // short curated HTML hint
     description: string; // full markdown help text from ghostty schema
     platform?: GhosttyPlatform[];
     since?: string;
-    repeatable?: boolean;
     disabled?: boolean;
     deprecated?: boolean | string;
 }
 
-interface SwitchSetting extends SettingInfo {
-    type: "switch";
-    default: boolean;
+export interface ScalarSettingInfo extends SettingInfoBase {
+    repeatable?: never;
+    default: string; // the config value at rest (Ghostty is a string format)
+    widget?: ScalarWidgetDef; // omitted → renders as a plain Text input
 }
 
-interface TextSetting extends SettingInfo {
-    type: "text";
-    default: string;
-    placeholder?: string;
-    size?: number;
+export interface RepeatableSettingInfo extends SettingInfoBase {
+    repeatable: true; // literal `true` so `satisfies` preserves it for the SettingValues mapped type
+    default: string[];
+    widget?: RepeatableWidgetDef; // omitted → renders as RepeatableText
 }
 
-interface NumberSetting extends SettingInfo {
-    type: "number";
-    default: number | undefined;
-    min?: number;
-    max?: number;
-    step?: number;
-    size?: number;
-    placeholder?: string;
-}
+export type SettingInfo = ScalarSettingInfo | RepeatableSettingInfo;
 
-interface RangeSetting extends SettingInfo {
-    type: "range";
-    default: number;
-    min: number;
-    max: number;
-    step?: number;
-    showLabels?: boolean;
-}
+export type SettingsRegistry = Record<string, SettingInfo>;
+
+// Maybe move this to keybind module?
+export type KeybindString = `${string}=${string}`;
+
+// --- Widget metadata (referenced by WidgetDef params below and by the renderer) ---
 
 export interface DropdownOption {
     name: string;
@@ -53,44 +44,6 @@ export interface DropdownOption {
     group?: string;
     disabled?: boolean;
 }
-
-interface DropdownSetting extends SettingInfo {
-    type: "dropdown";
-    default: string;
-    options: Array<DropdownOption | string>;
-    searchable?: boolean;
-    placeholder?: string;
-    allowEmpty?: boolean;
-    emptyLabel?: string;
-}
-
-interface ColorSetting extends SettingInfo {
-    type: "color";
-    default: HexColor | "";
-}
-
-interface PaletteSetting extends SettingInfo {
-    type: "palette";
-    default: HexColor[];
-}
-
-interface ThemeSetting extends SettingInfo {
-    type: "theme";
-    default: string;
-    options: Array<DropdownOption | string>;
-}
-
-// Maybe move this to keybind module?
-export type KeybindString = `${string}=${string}`;
-
-interface KeybindsSetting extends SettingInfo {
-    type: "keybinds";
-    default: KeybindString[];
-}
-
-// --- Phase A0: new-component widget types (see notes/plans/settings-component-integration.md §1) ---
-// These `type` members are intentionally temporary plumbing for the existing type-based renderer.
-// Phase A migrates widget selection into navigation (WidgetDef) and removes them. Keep minimal.
 
 export type PillVariant = "neutral" | "accent" | "danger";
 
@@ -115,91 +68,37 @@ export interface SpecialValue {
     variant?: PillVariant;
 }
 
-interface RepeatableTextSetting extends SettingInfo {
-    type: "repeatable-text";
-    default: string[];
-    placeholder?: string;
-    canReorder?: boolean;
-}
+// Keys for the group preview components. The union lives here (data-only) so navigation can
+// reference it while the renderer-side previews map implements `Record<PreviewKey, Component>` —
+// nav keys are checked valid and the map is checked exhaustive, both against this one list.
+export type PreviewKey = "baseColor" | "cursor" | "palette" | "appIcon";
 
-interface FeatureListSetting extends SettingInfo {
-    type: "feature-list";
-    default: string;
-    features: FeatureDef[];
-}
+// WidgetDef: widget selection + metadata, living on registry entries.
+// It is data-only, a string discriminant plus plain params,
+// so registry.ts stays free of `.svelte` imports and validateRegistry()/the Vitest suite stay clean.
+// Array/tuple fields are `readonly`; literals in the registry contextually type against them,
+// and the renderer casts to the mutable shapes its components expect at the (few) call sites
+// that pass them.
+export type WidgetDef =
+    | {type: "switch";}
+    | {type: "text"; placeholder?: string; size?: number;}
+    | {type: "number"; min?: number; max?: number; step?: number; size?: number; placeholder?: string; integer?: boolean;}
+    | {type: "range"; min: number; max: number; step?: number; showLabels?: boolean;}
+    | {type: "dropdown"; options: ReadonlyArray<DropdownOption | string>; searchable?: boolean; allowEmpty?: boolean; emptyLabel?: string; placeholder?: string;}
+    | {type: "color";}
+    | {type: "palette";}
+    | {type: "theme"; options: ReadonlyArray<DropdownOption | string>;}
+    | {type: "repeatable-text"; placeholder?: string; canReorder?: boolean;}
+    | {type: "feature-list"; features: readonly FeatureDef[];}
+    | {type: "pill"; options: readonly PillOption[];}
+    | {type: "duration"; allowEmpty?: boolean; placeholder?: string;}
+    | {type: "dual-number"; labels: readonly [string, string]; min?: number; max?: number; step?: number;}
+    | {type: "custom-color"; presets: readonly SpecialValue[]; widget?: "dropdown" | "pills";}
+    | {type: "custom-number"; presets: readonly SpecialValue[]; min?: number; max?: number; step?: number; size?: number; placeholder?: string; integer?: boolean; widget?: "dropdown" | "pills";}
+    | {type: "scroll-multiplier";}
+    | {type: "number-units";};
 
-interface PillSetting extends SettingInfo {
-    type: "pill";
-    default: string;
-    options: PillOption[];
-}
-
-interface DurationSetting extends SettingInfo {
-    type: "duration";
-    default: string;
-    allowEmpty?: boolean;
-    placeholder?: string;
-}
-
-interface DualNumberSetting extends SettingInfo {
-    type: "dual-number";
-    default: string;
-    labels: [string, string];
-    min?: number;
-    max?: number;
-    step?: number;
-}
-
-interface CustomColorSetting extends SettingInfo {
-    type: "custom-color";
-    default: string;
-    presets: SpecialValue[];
-    widget?: "dropdown" | "pills";
-}
-
-interface CustomNumberSetting extends SettingInfo {
-    type: "custom-number";
-    default: string;
-    presets: SpecialValue[];
-    min?: number;
-    max?: number;
-    step?: number;
-    size?: number;
-    placeholder?: string;
-    integer?: boolean;
-    widget?: "dropdown" | "pills";
-}
-
-interface ScrollMultiplierSetting extends SettingInfo {
-    type: "scroll-multiplier";
-    default: string;
-}
-
-interface NumberUnitsSetting extends SettingInfo {
-    type: "number-units";
-    default: string;
-}
-
-export type SettingDef =
-    | SwitchSetting
-    | TextSetting
-    | NumberSetting
-    | RangeSetting
-    | DropdownSetting
-    | ColorSetting
-    | PaletteSetting
-    | ThemeSetting
-    | KeybindsSetting
-    | RepeatableTextSetting
-    | FeatureListSetting
-    | PillSetting
-    | DurationSetting
-    | DualNumberSetting
-    | CustomColorSetting
-    | CustomNumberSetting
-    | ScrollMultiplierSetting
-    | NumberUnitsSetting;
-
-export type TypeToValue<T extends SettingDef["type"]> = Extract<SettingDef, {type: T;}>["default"];
-
-export type SettingsRegistry = Record<string, SettingDef>;
+// The widget kinds whose bound value is string[] rather than string. Splitting WidgetDef on
+// this is what lets the SettingInfo union check widget/value-shape agreement via `satisfies`.
+export type RepeatableWidgetDef = Extract<WidgetDef, {type: "repeatable-text" | "palette";}>;
+export type ScalarWidgetDef = Exclude<WidgetDef, RepeatableWidgetDef>;

@@ -1,7 +1,6 @@
 import {dev} from "$app/environment";
 import {registry, type SettingDefaults, type SettingValues} from "$lib/settings/registry";
 import {runInitializers} from "$lib/settings/initializers";
-import themes from "$lib/data/themes";
 
 
 // Run initializers before setting up defaults to ensure that any dynamic options are populated
@@ -14,47 +13,17 @@ if (dev) console.log(defaults); // eslint-disable-line no-console
 const config: SettingValues = $state(buildDefaults());
 
 
+// diff() is just diffFromDefaults() applied to the live store: every key in `config` exists in
+// the registry, and (for palette) every slot is always a real color — so the extra guards in
+// diffFromDefaults are no-ops here. One implementation, no drift.
 export function diff() {
-    // TODO: more elegance
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-redundant-type-constituents
-    const output: Partial<Record<keyof typeof defaults | string, any>> = {};
-
-    for (const k in config) {
-        const settingId = k as keyof SettingValues;
-        const settingKey = registry[settingId].key;
-        if (Array.isArray(config[settingId]) && settingId === "keybind") {
-            const toAdd = config[settingId].filter(c => !defaults[settingId].includes(c as never));
-            if (toAdd.length) output[settingKey] = toAdd;
-        }
-        else if (Array.isArray(config[settingId]) && settingId === "palette") {
-            const toAdd = [];
-            for (let p = 0; p < defaults[settingId].length; p++) {
-                if (config[settingId][p] === defaults[settingId][p]) continue;
-                toAdd.push(`${p}=${config[settingId][p]}`);
-            }
-            if (toAdd.length) output[settingKey] = toAdd;
-        }
-        else if (Array.isArray(config[settingId])) {
-            // Generic repeatable string[] settings (e.g. font-family): emit the whole list when
-            // it differs from the default, one config line per entry (see serialize()).
-            const cur = config[settingId] as string[];
-            const def = defaults[settingId] as string[];
-            const changed = cur.length !== def.length || cur.some((v, i) => v !== def[i]);
-            if (changed) output[settingKey] = cur.filter(v => v.trim() !== "");
-        }
-        else if (config[settingId] != defaults[settingId]) {
-            output[settingKey] = config[settingId];
-        }
-    }
-
-    return output;
+    return diffFromDefaults(config);
 }
 
-// FIXME: de-dup with above
 export function diffFromDefaults(conf: Partial<SettingValues>) {
-    // TODO: more elegance
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-redundant-type-constituents
-    const output: Partial<Record<keyof typeof defaults | string, any>> = {};
+    // Flat store: every emitted value is a Ghostty config string, or a string[] for the
+    // repeatable/indexed cases (keybind, palette, generic lists). No `any` needed post-flatten.
+    const output: Record<string, string | string[]> = {};
 
     for (const k in conf) {
         const settingId = k as keyof SettingValues;
@@ -65,7 +34,7 @@ export function diffFromDefaults(conf: Partial<SettingValues>) {
             if (toAdd.length) output[settingKey] = toAdd;
         }
         else if (Array.isArray(conf[settingId]) && settingId === "palette") {
-            const toAdd = [];
+            const toAdd: string[] = [];
             for (let p = 0; p < defaults[settingId].length; p++) {
                 if (!conf[settingId][p]) continue;
                 if (conf[settingId][p] === defaults[settingId][p]) continue;
@@ -79,7 +48,7 @@ export function diffFromDefaults(conf: Partial<SettingValues>) {
             const changed = cur.length !== def.length || cur.some((v, i) => v !== def[i]);
             if (changed) output[settingKey] = cur.filter(v => v.trim() !== "");
         }
-        else if (conf[settingId] != defaults[settingId]) {
+        else if (conf[settingId] !== undefined && conf[settingId] != defaults[settingId]) {
             output[settingKey] = conf[settingId];
         }
     }
@@ -91,8 +60,7 @@ export function load(conf: Partial<typeof config>) {
     for (const key in conf) {
         if (!(key in config)) continue;
         if (key !== "keybind" && key !== "palette") {
-            // @ts-expect-error doing this properly is hard
-            config[key as keyof typeof config] = conf[key as keyof typeof config]!;
+            setSetting(key as keyof typeof config, conf[key as keyof typeof config]!);
         }
         else if (key === "keybind") {
             config.keybind = [...config.keybind, ...conf.keybind!];
@@ -106,45 +74,21 @@ export function load(conf: Partial<typeof config>) {
     }
 }
 
-export function setColorScheme(name: string): boolean {
-    if (name === "") {
-        resetColorScheme();
-        return true;
-    }
+// NOTE: theme colors are never written into this store. Selecting a theme only sets the
+// `theme` string; the displayed colors are derived in stores/theme.svelte.ts (effectiveColors),
+// which is why diff() needs no theme-exclusion logic to keep exports clean.
 
-    const theme = themes[name as keyof typeof themes];
-    if (!theme) return false;
-
-    // Clear out any extra keys the next theme doesn't use
-    resetColorScheme();
-    load(theme);
-    return true;
-}
-
-export function resetColorScheme() {
-    const keys = [
-        "background",
-        "foreground",
-        "cursorColor",
-        "cursorText",
-        "selectionBackground",
-        "selectionForeground"
-    ] as Array<keyof SettingValues>;
-
-    for (const key of keys) {
-        // @ts-expect-error doing this properly is hard
-        config[key] = defaults[key];
-    }
-
-    for (let c = 0; c < defaults.palette.length; c++) {
-        config.palette[c] = defaults.palette[c];
-    }
+/**
+ * Typed single-setting write. Prefer this over assigning through a widened `config[key]`
+ * lvalue in components — the generic ties the value type to the key, no cast needed.
+ * */
+export function setSetting<K extends keyof SettingValues>(key: K, value: SettingValues[K]) {
+    config[key] = value;
 }
 
 export function resetSetting(key: keyof SettingValues) {
     const defaultValue = defaults[key];
-    // @ts-expect-error doing this properly is hard
-    config[key] = Array.isArray(defaultValue) ? [...defaultValue] : defaultValue;
+    setSetting(key, Array.isArray(defaultValue) ? [...defaultValue] : defaultValue);
 }
 
 export function isNonDefault(key: keyof SettingValues): boolean {

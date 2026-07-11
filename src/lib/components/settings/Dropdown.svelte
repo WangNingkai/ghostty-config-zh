@@ -48,6 +48,7 @@
         noResultsLabel?: string;
         disabled?: boolean;
         iconSize?: number;
+        maxWidth?: number;
         change?: (v: string) => void;
     };
 
@@ -63,6 +64,7 @@
         noResultsLabel = "No results",
         disabled = false,
         iconSize = 16,
+        maxWidth = 320,
         change
     }: Props = $props();
     /* eslint-enable prefer-const */
@@ -370,6 +372,7 @@
         class:open={isOpen}
         class:empty={!selectedOption}
         class:disabled
+        style:max-width="{maxWidth}px"
         bind:this={triggerEl}
         type="button"
         aria-expanded={isOpen}

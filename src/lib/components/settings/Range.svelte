@@ -1,32 +1,37 @@
 <script lang="ts">
     import {relativeTooltip} from "$lib/actions/tooltip.svelte";
     import {countDecimalPlaces} from "$lib/utils/numbers";
+    import {numberCodec} from "$lib/settings/codecs";
 
     interface RangeProps {
         min: number;
         max: number;
         step?: number;
-        value: number;
+        value: string; // flat-store string; parsed to a number internally via numberCodec
         showLabels?: boolean;
     }
 
     // why is eslint like this smh
     // eslint-disable-next-line prefer-const
-    let {value = $bindable(), min, max, step = 1, showLabels = true}: RangeProps = $props();
+    let {value = $bindable(""), min, max, step = 1, showLabels = true}: RangeProps = $props();
 
     // html refs
     let track: HTMLDivElement | undefined = $state();
     let thumb: HTMLDivElement | undefined = $state();
 
+    // The bound `value` is a string; slider math works off this parsed number (empty/garbage -> min).
+    const num = $derived(numberCodec.parse(value) ?? min);
+    const commit = (n: number) => value = numberCodec.serialize(n);
+
     // Calculate the percentage position of the thumb based on the current value
-    const percentage = $derived(((value - min) / (max - min)) * 100);
+    const percentage = $derived(((num - min) / (max - min)) * 100);
 
     // Calculate the number of decimal places to show based on step, min, and max
     const maxDecimalPlaces = $derived(Math.max(countDecimalPlaces(min), countDecimalPlaces(max), countDecimalPlaces(step)));
 
     // Get the value based on a pointer event's clientX position relative to the track
     function valueFromPointer(e: PointerEvent): number {
-        if (!track) return value;
+        if (!track) return num;
         const rect = track.getBoundingClientRect();
         const raw = ((e.clientX - rect.left) / rect.width) * (max - min) + min;
         const stepped = Math.round((raw - min) / step) * step + min;
@@ -39,12 +44,12 @@
         if (!track || e.button !== 0) return;
         dragging = true;
         track.setPointerCapture(e.pointerId);
-        value = valueFromPointer(e);
+        commit(valueFromPointer(e));
     }
 
     function onPointerMove(e: PointerEvent) {
         if (!dragging) return;
-        value = valueFromPointer(e);
+        commit(valueFromPointer(e));
     }
 
     function onPointerUp(e: PointerEvent) {
@@ -56,21 +61,19 @@
         const inc = e.shiftKey ? step * 10 : step;
         if (e.key === "ArrowRight" || e.key === "ArrowUp") {
             e.preventDefault();
-            const nextValue = Math.min(max, value + inc);
-            value = parseFloat(nextValue.toFixed(maxDecimalPlaces));
+            commit(parseFloat(Math.min(max, num + inc).toFixed(maxDecimalPlaces)));
         }
         else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
             e.preventDefault();
-            const nextValue = Math.max(min, value - inc);
-            value = parseFloat(nextValue.toFixed(maxDecimalPlaces));
+            commit(parseFloat(Math.max(min, num - inc).toFixed(maxDecimalPlaces)));
         }
         else if (e.key === "Home") {
             e.preventDefault();
-            value = parseFloat(min.toFixed(maxDecimalPlaces));
+            commit(parseFloat(min.toFixed(maxDecimalPlaces)));
         }
         else if (e.key === "End") {
             e.preventDefault();
-            value = parseFloat(max.toFixed(maxDecimalPlaces));
+            commit(parseFloat(max.toFixed(maxDecimalPlaces)));
         }
     }
 </script>
@@ -84,14 +87,14 @@
         bind:this={track}
         aria-valuemin={min}
         aria-valuemax={max}
-        aria-valuenow={value}
+        aria-valuenow={num}
         onpointerdown={onPointerDown}
         onpointermove={onPointerMove}
         onpointerup={onPointerUp}
         onpointercancel={onPointerUp}
         onkeydown={onKeyDown}
         use:relativeTooltip={{
-            text: Number.isInteger(step) ? value.toString() : value.toFixed(maxDecimalPlaces),
+            text: Number.isInteger(step) ? num.toString() : num.toFixed(maxDecimalPlaces),
             relativeTarget: thumb,
             numeric: true,
             offsetY: -4

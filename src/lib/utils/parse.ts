@@ -31,9 +31,6 @@ export function parse(configString: string) {
             if (num < 0 || num > 255) continue;
             results.palette[num] = color;
         }
-        else if (key === "keybind") {
-            results.keybind.push(value as KeybindString); // TODO: perform validation
-        }
         else {
             const split = key.split("-");
             let newKey = split[0].trim();
@@ -46,9 +43,11 @@ export function parse(configString: string) {
                 ? `#${value}`
                 : value;
 
-            // Repeatable settings (e.g. font-family) may appear on multiple lines; accumulate
-            // them into an array rather than letting later lines overwrite earlier ones.
-            if (registry[newKey as keyof typeof registry]?.type === "repeatable-text") {
+            // Repeatable settings (font-family, keybind, …) may appear on multiple lines;
+            // accumulate them into an array rather than letting later lines overwrite earlier
+            // ones. keybind needs no carveout here — it's just another `repeatable` key.
+            const entry = registry[newKey as keyof typeof registry] as {repeatable?: boolean} | undefined;
+            if (entry?.repeatable) {
                 const existing = results[newKey];
                 if (Array.isArray(existing)) existing.push(normalized);
                 else results[newKey] = [normalized];

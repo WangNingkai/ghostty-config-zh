@@ -81,6 +81,7 @@ The only automated deployment built-in is via Cloudflare Workers which automatic
 
 ## Roadmap
 
+### Completed
 - [x] Custom settings support
 - [x] Terminal preview
 - [x] Font playground
@@ -104,15 +105,16 @@ The only automated deployment built-in is via Cloudflare Workers which automatic
 - [x] Automatic theme sync from upstream [iTerm2 Color Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes/)
 - [x] Unified typed settings registry
 - [x] Interactive terminal preview with live re-theming
+- [x] Unit tests for import/export flows
 
 **Near-term**
 - [ ] Command palette builder (guided UI for `command-palette-entry` settings)
 - [ ] Community presets for quick theme/workflow setup
-- [ ] Unit tests for import/export flows
 - [ ] Unified color scheme across the app
 
 **Long-term**
 - [ ] Desktop version for direct config file integration
+- [ ] Component testing
 
 
 

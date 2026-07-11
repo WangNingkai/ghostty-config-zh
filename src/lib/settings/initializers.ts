@@ -1,14 +1,12 @@
-import themes from "$lib/data/themes";
-import {frameUrls, iconUrls} from "$lib/data/macicons";
-import {themeIcon} from "$lib/utils/themes";
-import {registry, type SettingsSchema} from "./registry";
+import {registry} from "./registry";
 
+type Registry = typeof registry;
 
-type AsyncInitializer = (registry: SettingsSchema) => Promise<void>;
+type AsyncInitializer = (registry: Registry) => Promise<void>;
 
 const asyncInitializers: AsyncInitializer[] = [
     // Font list... web: skip or no-op; desktop: shell out to `ghostty +list-fonts`
-    async (_: SettingsSchema) => {
+    async (_: Registry) => {
         // The following TODO was written by a clanker.
         // TODO: implement this, ideally by shelling out to `ghostty +list-fonts`
         // and parsing the output, which would ensure the list is accurate and
@@ -34,54 +32,16 @@ const getOS = () => {
     return "other";
 };
 
-type Initializer = (registry: SettingsSchema) => void;
+type Initializer = (registry: Registry) => void;
 
 const syncInitializers: Initializer[] = [
-    (_: SettingsSchema) => {
+    (_: Registry) => {
         // Leaving this here as an example for the future
         // Apparently Ghostty now sets this to "true" for both mac and linux
         // reg.copyOnSelect.default = getOS() === "linux" ? "true" : "false";
     },
 
-    // Theme list from iTerm2-Color-Schemes
-    (reg: SettingsSchema) => {
-        const themeSetting = reg.theme;
-        if (themeSetting?.type !== "theme") return;
-        themeSetting.options = Object.entries(themes).map(([name, scheme]) => ({
-            name,
-            value: name,
-            icon: themeIcon(scheme)
-        }));
-    },
-
-    // MacOS icon options
-    (reg: SettingsSchema) => {
-        const iconSetting = reg.macosIcon;
-        if (iconSetting?.type !== "dropdown") return;
-        iconSetting.options = [
-            ...Object.keys(iconUrls).map(key => ({
-                value: key,
-                name: key[0].toUpperCase() + key.slice(1),
-                group: "Predefined icons",
-                icon: iconUrls[key as keyof typeof iconUrls]
-            })),
-            {value: "custom", name: "Custom Icon", description: "Use your own icon file.", group: "Custom"},
-            {value: "custom-style", name: "Custom Style", description: "Customize the icon with colors and frames.", group: "Custom"}
-        ];
-    },
-
-    // MacOS icon frame options
-    (reg: SettingsSchema) => {
-        const frameSetting = reg.macosIconFrame;
-        if (frameSetting?.type !== "dropdown") return;
-        frameSetting.options = Object.keys(frameUrls).map(key => ({
-            value: key,
-            name: key[0].toUpperCase() + key.slice(1),
-            icon: frameUrls[key as keyof typeof frameUrls]
-        }));
-    },
-
-    (reg: SettingsSchema) => reg.quitAfterLastWindowClosed.default = getOS() !== "macos",
+    (reg: Registry) => reg.quitAfterLastWindowClosed.default = String(getOS() !== "macos"),
 ];
 
 export function runSyncInitializers() {

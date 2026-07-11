@@ -10,7 +10,7 @@ export function makeFilesystem(): DirNode {
                 type: "dir",
                 children: {
                     "note.md": {type: "file", content: "Welcome to your Ghostty terminal!"},
-                    "notes.txt": {type: "file", content: "Meeting notes – Jan 1\nTODO: update ghostty config"},
+                    "notes.txt": {type: "file", content: "Meeting notes - Jan 1\nTODO: update ghostty config"},
                     "todo.md": {type: "file", content: "# TODO\n- [ ] Configure ghostty\n- [x] Install ghostty\n- [ ] Customize colors"},
                     "report.pdf": {type: "file", content: "(binary file)"},
                 },
